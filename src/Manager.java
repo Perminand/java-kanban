@@ -1,10 +1,10 @@
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 
 public class Manager {
-    private ArrayList<Task> listTask = new ArrayList<>();
-    private ArrayList<Epic> listEpic = new ArrayList<>();
-    private ArrayList<SubTask> listSubTask = new ArrayList<>();
+    private final ArrayList<Task> listTask = new ArrayList<>();
+    private final ArrayList<Epic> listEpic = new ArrayList<>();
+    private final ArrayList<SubTask> listSubTask = new ArrayList<>();
     static String[] listStatus = {"NEW", "IN_PROGRESS", "DONE"};
     private int uin = 0;
 
@@ -20,16 +20,20 @@ public class Manager {
         listSubTask.add(subTask);
         Epic epic = findEpicToAffiliation(subTask.getAffiliation());
         if (epic == null) return;
-        findEpicToAffiliation(subTask.getAffiliation()).getIdSubTask().add(subTask.getUin());
-        ;
+        Objects.requireNonNull(findEpicToAffiliation(subTask.getAffiliation())).getIdSubTask().add(subTask.getUin());
         statusCalc(subTask.getAffiliation());
     }
 
-    public void createEpic(Epic epic) {
+    public void createEpic(Epic epic, ArrayList<SubTask> arrayList) {
         if (epic == null) return;
-        int id = getUin();
-        epic.setUin(id);
+        epic.setUin(getUin());
         epic.setStatus("NEW");
+        for (SubTask subTask : arrayList) {
+            subTask.setAffiliation(epic.getUin());
+            subTask.setUin(getUin());
+            listSubTask.add(subTask);
+            epic.getIdSubTask().add(subTask.getUin());
+        }
         listEpic.add(epic);
     }
 
@@ -38,8 +42,8 @@ public class Manager {
         for (Task line : listTask) {
             if (line.getUin() == task.getUin()) {
                 line.setNameTask(task.getNameTask());
-                line.setDiscription(task.getDiscription());
-                line.setStatus(task.getStatus());
+                line.setDescription(task.getDescription());
+                if (task.getStatus() != null) line.setStatus(task.getStatus());
                 return;
             }
         }
@@ -47,16 +51,17 @@ public class Manager {
 
     public void updateSubTask(SubTask subTask) {
         if (subTask == null) return;
-        int affilation = 0;
+        int affiliation = 0;
         for (int i = 0; i < listSubTask.size(); i++) {
             if (listSubTask.get(i).getUin() == subTask.getUin()) {
-                affilation = listSubTask.get(i).getAffiliation();
-                subTask.setAffiliation(affilation);
+                affiliation = listSubTask.get(i).getAffiliation();
+                subTask.setAffiliation(affiliation);
+                if (subTask.getStatus() == null) subTask.setStatus(listSubTask.get(i).getStatus());
                 listSubTask.set(i, subTask);
                 break;
             }
         }
-        statusCalc(affilation);
+        statusCalc(affiliation);
     }
 
     public void updateEpic(Epic epic) {
@@ -64,7 +69,7 @@ public class Manager {
         for (Epic line : listEpic) {
             if (line.getUin() == epic.getUin()) {
                 line.setNameTask(epic.getNameTask());
-                line.setDiscription(epic.getDiscription());
+                line.setDescription(epic.getDescription());
             }
         }
         statusCalc(uin);
@@ -92,22 +97,31 @@ public class Manager {
 
     public void remove(int id) {
         if (id < 0) return;
+        int indTask = -1;
         for (int i = 0; i < listTask.size(); i++) {
-            if (listTask.get(i).getUin() == id) listTask.remove(i);
+            if (listTask.get(i).getUin() == id)
+                indTask = i;//Вместо listEpic.remove(i);
         }
+        if (indTask >= 0) listTask.remove(indTask);
         for (int i = 0; i < listEpic.size(); i++) {
             if (listEpic.get(i).getUin() == id) {
-                listEpic.remove(i);
+                indTask = i;//Вместо listEpic.remove(i);
             }
         }
+        if (indTask >= 0) listEpic.remove(indTask);
+        int affiliation = -1;
         for (int i = 0; i < listSubTask.size(); i++) {
             if (listSubTask.get(i).getUin() == id) {
-                int affiliation = listSubTask.get(i).getAffiliation();
-                listSubTask.remove(i);
-                statusCalc(affiliation);
+                affiliation = listSubTask.get(i).getAffiliation();
+                indTask = i;//Вместо listEpic.remove(i);
+                Epic epic = findEpicToAffiliation(affiliation);
+                for (int j = 0; j < Objects.requireNonNull(epic).getIdSubTask().size(); j++) {
+                    epic.getIdSubTask().remove((Integer) id);
+                }
             }
-
         }
+        if (indTask >= 0) listSubTask.remove(indTask);
+        if (affiliation >= 0) statusCalc(affiliation);
     }
 
     void removeAllTask() {
@@ -117,44 +131,53 @@ public class Manager {
     void removeAllSubTaskByEpic(int uinEpic) {
         ArrayList<SubTask> arrUinSubTask = getSubTaskByIdEpic(uinEpic);
         if (arrUinSubTask == null) return;
+
         for (SubTask subTask : arrUinSubTask) {
+            int indTask = -1;
             for (int i = 0; i < listSubTask.size(); i++) {
                 if (subTask.getUin() == listSubTask.get(i).getUin()) {
-                    listSubTask.remove(i);
+                    indTask = i;
                     for (Epic epic : listEpic) {
                         if (epic.getUin() == uinEpic) {
                             epic.setStatus(listStatus[0]);
+                            epic.getIdSubTask().clear();
                         }
                     }
                 }
             }
+            if (indTask >= 0) listSubTask.remove(indTask);
         }
     }
 
     void removeSubTask() {
         listSubTask.clear();
+        for (Epic epic : listEpic) {
+            epic.getIdSubTask().clear();
+        }
     }
 
     void removeAllEpic() {
+        listSubTask.clear();
         listEpic.clear();
     }
 
-    public void statusCalc(int affilation) {
-        if (affilation == 0) return;
-        ArrayList<SubTask> listTask = getSubTaskByIdEpic(affilation);
+    public void statusCalc(int affiliation) {
+        ArrayList<SubTask> listTask = getSubTaskByIdEpic(affiliation);
         int[] status = {0, 0, 0};
+        Epic epic = findEpicToAffiliation(affiliation);
+        if (epic == null) return;
         if (listTask.isEmpty()) {
-            findEpicToAffiliation(affilation).setStatus(listStatus[0]);
+            epic.setStatus(listStatus[0]);
             return;
         }
         for (SubTask subTask : listTask) {
-            if (subTask.getStatus() == listStatus[0]) status[0]++;
-            if (subTask.getStatus() == listStatus[1]) status[1]++;
-            if (subTask.getStatus() == listStatus[2]) status[2]++;
+            if (subTask.getStatus().equals(listStatus[0])) status[0]++;
+            if (subTask.getStatus().equals(listStatus[1])) status[1]++;
+            if (subTask.getStatus().equals(listStatus[2])) status[2]++;
         }
-        if (status[0] == 0 && status[1] == 0) findEpicToAffiliation(affilation).setStatus(listStatus[2]);
-        else if (status[0] < listTask.size()) findEpicToAffiliation(affilation).setStatus(listStatus[1]);
-        else findEpicToAffiliation(affilation).setStatus(listStatus[0]);
+        if (status[0] == 0 && status[1] == 0) epic.setStatus(listStatus[2]);
+        else if (status[0] < listTask.size()) epic.setStatus(listStatus[1]);
+        else epic.setStatus(listStatus[0]);
     }
 
     public ArrayList<SubTask> getSubTaskByIdEpic(int id) {

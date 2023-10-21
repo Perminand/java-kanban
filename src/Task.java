@@ -1,40 +1,38 @@
 public class Task {
     private String nameTask;
-    private String discription;
+    private String description;
     private int uin;
     private String status;
 
-    public Task(String nameTask, String discription) {
+    public Task(String nameTask, String description) {
         this.uin++;
         this.nameTask = nameTask;
-        this.discription = discription;
+        this.description = description;
         this.status = "NEW";
-
     }
-        public Task(String nameTask, String discription, int uin, String status) {
+
+    public Task(String nameTask, String description, int uin) {
         this.nameTask = nameTask;
-        this.discription = discription;
+        this.description = description;
+        this.uin = uin;
+    }
+
+    public Task(String nameTask, String description, int uin, String status) {
+        this.nameTask = nameTask;
+        this.description = description;
         this.uin = uin;
         this.status = status;
-
-    }
-    public Task(String nameTask, String discription,String status) {
-        this.nameTask = nameTask;
-        this.discription = discription;
-//        this.uin = uin;
-        this.status = status;
-
     }
 
     public String getNameTask() {
         return nameTask;
     }
 
-    public String getDiscription() {
-        return discription;
+    public String getDescription() {
+        return description;
     }
 
-     public String getStatus() {
+    public String getStatus() {
         return status;
     }
 
@@ -42,7 +40,7 @@ public class Task {
     public String toString() {
         return "Task{" +
                 "nameTask='" + nameTask + '\'' +
-                ", discription='" + discription + '\'' +
+                ", description='" + description + '\'' +
                 ", uin=" + uin +
                 ", status='" + status + '\'' +
                 '}';
@@ -60,8 +58,8 @@ public class Task {
         this.nameTask = nameTask;
     }
 
-    public void setDiscription(String discription) {
-        this.discription = discription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setStatus(String status) {
