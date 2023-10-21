@@ -1,13 +1,29 @@
 public class Task {
     String nameTask;
     String discription;
-    private int uin=0;
-    String status ="NEW";
+    int uin;
+    String status;
 
-    public Task(String nameTask, String discription, int uin) {
-        this.uin=uin;
+    public Task(String nameTask, String discription) {
+        this.uin++;
         this.nameTask = nameTask;
         this.discription = discription;
+        this.status = "NEW";
+
+    }
+
+    public Task(String nameTask, String discription, int uin) {
+        this.nameTask = nameTask;
+        this.discription = discription;
+        this.uin = uin;
+        this.status = "NEW";
+
+    }
+    public Task(String nameTask, String discription, int uin, String status) {
+        this.nameTask = nameTask;
+        this.discription = discription;
+        this.uin = uin;
+        this.status = status;
 
     }
 
@@ -33,7 +49,23 @@ public class Task {
                 '}';
     }
 
+    public void setUin(int uin) {
+        this.uin = uin;
+    }
+
     public int getUin() {
         return uin;
+    }
+
+    public void setNameTask(String nameTask) {
+        this.nameTask = nameTask;
+    }
+
+    public void setDiscription(String discription) {
+        this.discription = discription;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
