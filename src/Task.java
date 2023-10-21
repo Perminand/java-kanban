@@ -1,8 +1,8 @@
 public class Task {
-    String nameTask;
-    String discription;
-    int uin;
-    String status;
+    private String nameTask;
+    private String discription;
+    private int uin;
+    private String status;
 
     public Task(String nameTask, String discription) {
         this.uin++;
@@ -23,6 +23,13 @@ public class Task {
         this.nameTask = nameTask;
         this.discription = discription;
         this.uin = uin;
+        this.status = status;
+
+    }
+    public Task(String nameTask, String discription,String status) {
+        this.nameTask = nameTask;
+        this.discription = discription;
+//        this.uin = uin;
         this.status = status;
 
     }

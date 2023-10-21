@@ -27,8 +27,9 @@ public class Epic extends Task{
             }else{
                 status=listStatus[1];
             }
+        }else{
+            status=listStatus[0];
         }
-
     }
 
     public ArrayList<Task> getListTask() {

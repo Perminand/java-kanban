@@ -14,12 +14,12 @@ public class Main {
         taskList.add(new Task("подЗадача2", "Описание2"));
         Epic epic1 = new Epic("Эпик1","Описание1",taskList);
         task2= new Task("Задача3", "Описание3", 2);
-        task3 = new Task("Задача3", "Описание3", 2,"DONE");
+//        task3 = new Task("Задача3", "Описание3", 2,"IN_PROGRESS");
         epic1= new Epic("Эпик4","Описание4",3,taskList);
         manager.createEpic(epic1);
         System.out.println(manager.getTaskByIdEpic(3));
 
-        manager.updateTask(task3);
+//        manager.updateTask(task3);
         manager.updateEpic(epic1);
 
 
