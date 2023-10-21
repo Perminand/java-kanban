@@ -11,15 +11,7 @@ public class Task {
         this.status = "NEW";
 
     }
-
-    public Task(String nameTask, String discription, int uin) {
-        this.nameTask = nameTask;
-        this.discription = discription;
-        this.uin = uin;
-        this.status = "NEW";
-
-    }
-    public Task(String nameTask, String discription, int uin, String status) {
+        public Task(String nameTask, String discription, int uin, String status) {
         this.nameTask = nameTask;
         this.discription = discription;
         this.uin = uin;
