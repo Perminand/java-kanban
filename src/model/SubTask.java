@@ -1,9 +1,11 @@
-public class SubTask extends Task {
-    int affiliation;
+package model;
 
-    public SubTask(String nameTask, String description, int affiliation) {
+public class SubTask extends Task {
+    private int epicId;
+
+    public SubTask(String nameTask, String description, int epicId) {
         super(nameTask, description);
-        this.affiliation = affiliation;
+        this.epicId = epicId;
     }
 
     public SubTask(String nameTask, String description, int uin, String status) {
@@ -16,18 +18,18 @@ public class SubTask extends Task {
         super(nameTask, description);
     }
 
-    public int getAffiliation() {
-        return affiliation;
+    public int getEpicId() {
+        return epicId;
     }
 
-    public void setAffiliation(int affiliation) {
-        this.affiliation = affiliation;
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
     }
 
     @Override
     public String toString() {
         return "SubTask{" +
-                "affiliation=" + affiliation +
+                "epicId=" + epicId +
                 "} " + super.toString();
     }
 }

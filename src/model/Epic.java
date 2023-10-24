@@ -1,3 +1,5 @@
+package model;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -9,14 +11,17 @@ public class Epic extends Task {
         this.idSubTask = new ArrayList<>();
     }
 
-    public Epic(String nameEpic, String description, int uin, String status) {//При создании обновления
-        super(nameEpic, description, uin, status);
+    public Epic(String nameEpic, String description, int uin) {//При создании обновления
+        super(nameEpic, description, uin);
     }
 
     public ArrayList<Integer> getIdSubTask() {
         return idSubTask;
     }
 
+    public void setIdSubTask(ArrayList<Integer> idSubTask) {
+        this.idSubTask = idSubTask;
+    }
 
     @Override
     public String toString() {
