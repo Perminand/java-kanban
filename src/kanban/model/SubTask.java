@@ -1,4 +1,4 @@
-package model;
+package kanban.model;
 
 public class SubTask extends Task {
     private int epicId;
@@ -8,7 +8,7 @@ public class SubTask extends Task {
         this.epicId = epicId;
     }
 
-    public SubTask(String nameTask, String description, int uin, String status) {
+    public SubTask(String nameTask, String description, int uin, Status status) {
         super(nameTask, description);
         this.setUin(uin);
         this.setStatus(status);

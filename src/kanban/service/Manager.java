@@ -1,9 +1,9 @@
-package service;
+package kanban.service;
 
-import model.Epic;
-import model.Status;
-import model.SubTask;
-import model.Task;
+import kanban.model.Epic;
+import kanban.model.Status;
+import kanban.model.SubTask;
+import kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +13,6 @@ public class Manager {
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
     private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
-    Status statusNew = Status.NEW;
-    Status statusInProgress = Status.IN_PROGRESS;
-    Status statusDone = Status.DONE;
     private int uin = 0;
 
     public void createTask(Task task) {
@@ -39,7 +36,7 @@ public class Manager {
     public int createEpic(Epic epic) {
         int key = getUin();
         epic.setUin(key);
-        epic.setStatus(String.valueOf(statusNew));
+        epic.setStatus(Status.NEW);
         mapEpic.put(key, epic);
         return key;
     }
@@ -129,18 +126,18 @@ public class Manager {
         if (epic == null) return;
         ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
         if (subTasks.isEmpty()) {
-            epic.setStatus(String.valueOf(statusNew));
+            epic.setStatus(Status.NEW);
             return;
         }
         int[] status = {0, 0, 0};//Подсчитываем статусы ["NEW"]["IN_PROGRESS"]["DONE"]
         for (SubTask subTask : subTasks) {
-            if (subTask.getStatus().equals(String.valueOf(statusNew))) status[0]++;
-            if (subTask.getStatus().equals(String.valueOf(statusInProgress))) status[1]++;
-            if (subTask.getStatus().equals(String.valueOf(statusDone))) status[2]++;
+            if (subTask.getStatus().equals(Status.NEW)) status[0]++;
+            if (subTask.getStatus().equals(Status.IN_PROGRESS)) status[1]++;
+            if (subTask.getStatus().equals(Status.DONE)) status[2]++;
         }
-        if (status[0] == 0 && status[1] == 0) epic.setStatus(String.valueOf(statusDone));
-        else if (status[0] < subTasks.size()) epic.setStatus(String.valueOf(statusInProgress));
-        else epic.setStatus(String.valueOf(statusNew));
+        if (status[0] == 0 && status[1] == 0) epic.setStatus(Status.DONE);
+        else if (status[0] < subTasks.size()) epic.setStatus(Status.IN_PROGRESS);
+        else epic.setStatus(Status.NEW);
     }
 
     public ArrayList<SubTask> getSubTaskByIdEpic(Epic epic) {

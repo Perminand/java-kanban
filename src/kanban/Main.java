@@ -1,5 +1,7 @@
-import service.Manager;
-import model.*;
+package kanban;
+
+import kanban.service.Manager;
+import kanban.model.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -25,9 +27,9 @@ public class Main {
         manager.updateEpic(new Epic("Изменненый эпик1","Измененное расписание1",idEpic));
         System.out.println(manager.getMapEpic());
         System.out.println("Изменяем задачу:");
-        manager.updateTask(new Task("ИзмененнаяЗадача1", "ИзмененноеОписание1", 0, "DONE"));
+        manager.updateTask(new Task("ИзмененнаяЗадача1", "ИзмененноеОписание1", 0, Status.DONE));
         System.out.println(manager.getMapEpic());
-        manager.updateSubTask(new SubTask("ИзмененнаяПодЗадача3", "ИзмененнаяОписание3", 3, "DONE"));
+        manager.updateSubTask(new SubTask("ИзмененнаяПодЗадача3", "ИзмененнаяОписание3", 3, Status.DONE));
         System.out.println(manager.getMapSubTask());
         System.out.println(manager.getMapEpic());
         System.out.println("Удаляем по ИД:");
