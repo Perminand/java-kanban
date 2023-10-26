@@ -49,10 +49,9 @@ public class Manager {
     public void updateSubTask(SubTask subTask) {
         if (subTask == null) return;
         int epicId = mapSubTask.get(subTask.getUin()).getEpicId();
-        Epic epic = mapEpic.get(mapSubTask.get(subTask.getUin()).getEpicId());
+        Epic epic = mapEpic.get(epicId);
         int key = subTask.getUin();
         subTask.setEpicId(epicId);
-        subTask.setUin(key);
         mapSubTask.put(key, subTask);
         statusCalc(epic);
     }
@@ -81,11 +80,8 @@ public class Manager {
             return;
         }
         if (mapEpic.get(id) != null) {
-            ArrayList<Integer> listSubTask = mapEpic.get(id).getIdSubTask();
-            for (Integer i : listSubTask) {
-                deleteById(i);
-                return;
-            }
+            Epic epic = mapEpic.get(id);
+            removeAllSubTaskByEpic(epic);
         }
         if (mapSubTask.get(id) != null) {
             Epic epic = mapEpic.get(mapSubTask.get(id).getEpicId());
@@ -99,45 +95,17 @@ public class Manager {
         mapTask.clear();
     }
 
-    public void removeAllSubTaskByEpic(int uinEpic) {
-        ArrayList<Integer> listSubTask = mapEpic.get(uinEpic).getIdSubTask();
-        if (listSubTask == null) return;
-        for (int i = 0; i < listSubTask.size(); i++) {
-            deleteById(i);
-        }
-        statusCalc(mapEpic.get(uinEpic));
-    }
-
-
     public void removeAllSubTask() {
         mapSubTask.clear();
         for (Epic epic : mapEpic.values()) {
             epic.getIdSubTask().clear();
-            statusCalc(epic);
+            epic.setStatus(Status.NEW);
         }
     }
 
     public void removeAllEpic() {
         mapSubTask.clear();
         mapEpic.clear();
-    }
-
-    private void statusCalc(Epic epic) {
-        if (epic == null) return;
-        ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
-        if (subTasks.isEmpty()) {
-            epic.setStatus(Status.NEW);
-            return;
-        }
-        int[] status = {0, 0, 0};//Подсчитываем статусы ["NEW"]["IN_PROGRESS"]["DONE"]
-        for (SubTask subTask : subTasks) {
-            if (subTask.getStatus().equals(Status.NEW)) status[0]++;
-            if (subTask.getStatus().equals(Status.IN_PROGRESS)) status[1]++;
-            if (subTask.getStatus().equals(Status.DONE)) status[2]++;
-        }
-        if (status[0] == 0 && status[1] == 0) epic.setStatus(Status.DONE);
-        else if (status[0] < subTasks.size()) epic.setStatus(Status.IN_PROGRESS);
-        else epic.setStatus(Status.NEW);
     }
 
     public ArrayList<SubTask> getSubTaskByIdEpic(Epic epic) {
@@ -158,6 +126,33 @@ public class Manager {
 
     public ArrayList<SubTask> getMapSubTask() {
         return new ArrayList<>(mapSubTask.values());
+    }
+
+    private void removeAllSubTaskByEpic(Epic epic) {
+        ArrayList<Integer> listSubTask = epic.getIdSubTask();
+        if (listSubTask.isEmpty()) return;
+        for (int i = 0; i < listSubTask.size(); i++) {
+            mapSubTask.remove(i);
+        }
+        epic.setStatus(Status.NEW);
+    }
+
+    private void statusCalc(Epic epic) {
+        if (epic == null) return;
+        ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
+        if (subTasks.isEmpty()) {
+            epic.setStatus(Status.NEW);
+            return;
+        }
+        int[] status = {0, 0, 0};//Подсчитываем статусы ["NEW"]["IN_PROGRESS"]["DONE"]
+        for (SubTask subTask : subTasks) {
+            if (subTask.getStatus().equals(Status.NEW)) status[0]++;
+            if (subTask.getStatus().equals(Status.IN_PROGRESS)) status[1]++;
+            if (subTask.getStatus().equals(Status.DONE)) status[2]++;
+        }
+        if (status[0] == 0 && status[1] == 0) epic.setStatus(Status.DONE);
+        else if (status[0] < subTasks.size()) epic.setStatus(Status.IN_PROGRESS);
+        else epic.setStatus(Status.NEW);
     }
 
     private int getUin() {

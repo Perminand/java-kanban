@@ -24,7 +24,7 @@ public class Main {
         manager.createSubTask(new SubTask("ПодЗадача2", "Описание2", idEpic));
         System.out.println(manager.getMapSubTask());
         System.out.println("Изменяем эпик:");
-        manager.updateEpic(new Epic("Изменненый эпик1","Измененное расписание1",idEpic));
+        manager.updateEpic(new Epic("Измененный эпик1","Измененное расписание1",idEpic));
         System.out.println(manager.getMapEpic());
         System.out.println("Изменяем задачу:");
         manager.updateTask(new Task("ИзмененнаяЗадача1", "ИзмененноеОписание1", 0, Status.DONE));
@@ -41,7 +41,6 @@ public class Main {
         manager.removeAllTask();
         System.out.println(manager.getMapTask());
         System.out.println("Удаляем все подзадачи эпика по ИД:");
-        manager.removeAllSubTaskByEpic(idEpic);
         System.out.println(manager.getMapSubTask());
         System.out.println("Удаляем все подзадачи");
         manager.removeAllSubTask();
