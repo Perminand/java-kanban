@@ -7,12 +7,14 @@ import kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryTaskManager implements Manager {
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
     private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
     private int uin = 0;
+    private List<Task> history = new ArrayList<>();
 
     @Override
     public void createTask(Task task) {
@@ -27,9 +29,9 @@ public class InMemoryTaskManager implements Manager {
         if (subTask == null) return;
         int key = getUin();
         subTask.setUin(key);
-        mapSubTask.put(key, subTask);
         Epic epic = mapEpic.get(subTask.getEpicId());
         if (epic == null) return;
+        mapSubTask.put(key, subTask);
         epic.getIdSubTask().add(subTask.getUin());
         statusCalc(epic);
     }
@@ -69,7 +71,36 @@ public class InMemoryTaskManager implements Manager {
     }
 
     @Override
-    public Task getById(int id) {
+    public Task getTask(int id){
+        if (mapTask.get(id) != null) {
+            Task task = mapTask.get(id);
+            addTaskToHistory(task);
+            return task;
+        }
+        return null;
+    }
+    @Override
+    public SubTask getSubTask(int id){
+        if (mapSubTask.get(id) != null) {
+            SubTask subTask = mapSubTask.get(id);
+            addTaskToHistory(subTask);
+            return subTask;
+        }
+        return null;
+    }
+    @Override
+    public Epic getEpic(int id){
+        if (mapEpic.get(id) != null) {
+            Epic epic = mapEpic.get(id);
+            addTaskToHistory(epic);
+            return epic;
+        }
+        return null;
+    }
+
+
+    @Override
+    public Task getFindById(int id) {
         if (id < 0) return null;
         if (mapTask.get(id) != null) return mapTask.get(id);
         if (mapEpic.get(id) != null) return mapEpic.get(id);
@@ -138,6 +169,15 @@ public class InMemoryTaskManager implements Manager {
     @Override
     public ArrayList<SubTask> getMapSubTask() {
         return new ArrayList<>(mapSubTask.values());
+    }
+
+    public List<Task> getHistory() {
+        return history;
+    }
+
+    private void addTaskToHistory(Task task){
+        if(history.size()>9) history.remove(0);
+        history.add(task);
     }
 
     private void removeAllSubTaskByEpic(Epic epic) {

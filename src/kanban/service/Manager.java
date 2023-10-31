@@ -7,8 +7,6 @@ import kanban.model.Task;
 import java.util.ArrayList;
 
 interface Manager {
-
-
     void createTask(Task task);
 
     void createSubTask(SubTask subTask);
@@ -22,7 +20,11 @@ interface Manager {
 
     void updateTask(Task task);
 
-    Task getById(int id);
+    Task getFindById(int id);
+
+    Task getTask(int id);
+    SubTask getSubTask(int id);
+    Epic getEpic(int id);
 
     void deleteById(int id);
 
