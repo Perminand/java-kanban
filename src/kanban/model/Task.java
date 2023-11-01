@@ -1,5 +1,7 @@
 package kanban.model;
 
+import kanban.enumClass.Status;
+
 public class Task {
     private  String nameTask;
     private  String description;

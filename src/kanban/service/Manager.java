@@ -11,8 +11,7 @@ interface Manager {
 
     void createSubTask(SubTask subTask);
 
-    int createEpic(Epic epic);
-
+    void createEpic(Epic epic);
 
     void updateSubTask(SubTask subTask);
 
@@ -20,11 +19,13 @@ interface Manager {
 
     void updateTask(Task task);
 
-    Task getFindById(int id);
-
     Task getTask(int id);
+
     SubTask getSubTask(int id);
+
     Epic getEpic(int id);
+
+    Task getFindById(int id);
 
     void deleteById(int id);
 
@@ -33,13 +34,5 @@ interface Manager {
     void removeAllSubTask();
 
     void removeAllEpic();
-
-    ArrayList<SubTask> getSubTaskByIdEpic(Epic epic);
-
-    ArrayList<Task> getMapTask();
-
-    ArrayList<Epic> getMapEpic();
-
-    ArrayList<SubTask> getMapSubTask();
 
 }
