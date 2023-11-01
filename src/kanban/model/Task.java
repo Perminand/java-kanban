@@ -3,8 +3,8 @@ package kanban.model;
 import kanban.enumClass.Status;
 
 public class Task {
-    private  String nameTask;
-    private  String description;
+    private final String nameTask;//обновление идет полным объектом Task
+    private final String description;
     private Integer uin;
     private Status status;
 
@@ -28,6 +28,26 @@ public class Task {
         this.status = status;
     }
 
+    public void setUin(int uin) {
+        this.uin = uin;
+    }
+
+    public int getUin() {
+        return uin;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getNameTask() {
+        return nameTask;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -36,29 +56,5 @@ public class Task {
                 ", uin=" + uin +
                 ", status='" + status + '\'' +
                 '}';
-    }
-
-    public void setUin(int uin) {
-
-        this.uin = uin;
-    }
-    public int getUin() {
-
-        return uin;
-    }
-    public void setStatus(Status status) {
-
-        this.status = status;
-    }
-    public String getNameTask() {
-        return nameTask;
-    }
-    public String getDescription() {
-
-        return description;
-    }
-    public Status getStatus() {
-
-        return status;
     }
 }

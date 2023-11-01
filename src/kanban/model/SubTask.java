@@ -5,6 +5,10 @@ import kanban.enumClass.Status;
 public class SubTask extends Task {
     private int epicId;
 
+    public SubTask(String nameTask, String description) {
+     super(nameTask, description);
+    }
+
     public SubTask(String nameTask, String description, int epicId) {
         super(nameTask, description);
         this.epicId = epicId;
@@ -14,10 +18,6 @@ public class SubTask extends Task {
         super(nameTask, description);
         this.setUin(uin);
         this.setStatus(status);
-    }
-
-    public SubTask(String nameTask, String description) {
-        super(nameTask, description);
     }
 
     public int getEpicId() {

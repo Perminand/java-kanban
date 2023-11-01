@@ -1,12 +1,12 @@
-package kanban.service;
+package kanban.interfaces;
 
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
-import java.util.ArrayList;
+import java.util.List;
 
-interface Manager {
+public interface TaskManager {
     void createTask(Task task);
 
     void createSubTask(SubTask subTask);
@@ -25,8 +25,6 @@ interface Manager {
 
     Epic getEpic(int id);
 
-    Task getFindById(int id);
-
     void deleteById(int id);
 
     void removeAllTask();
@@ -34,5 +32,4 @@ interface Manager {
     void removeAllSubTask();
 
     void removeAllEpic();
-
 }

@@ -3,7 +3,6 @@ package kanban.model;
 import java.util.ArrayList;
 
 public class Epic extends Task {
-
     private ArrayList<Integer> idSubTask;
 
     public Epic(String nameEpic, String discription) {

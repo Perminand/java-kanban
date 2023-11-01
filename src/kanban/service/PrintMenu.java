@@ -2,13 +2,10 @@ package kanban.service;
 
 import kanban.enumClass.TypeMenu;
 import kanban.enumClass.TypeTask;
-import kanban.model.Task;
 import kanban.model.TypeMenusAndTasks;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.Set;
 
 public class PrintMenu {
     public static void mainPrintMenu() {
@@ -17,19 +14,18 @@ public class PrintMenu {
         System.out.println("2. Получить задачи");
         System.out.println("3. Обновить задачи");
         System.out.println("4. Удалить задачи");
+        System.out.println("5. Просмотр истории");
         System.out.println("0. Выход");
         System.out.print("Введите команду:");
 
     }
 
-    public static void printMenuSubTask(Scanner scanner, InMemoryTaskManager manager, TypeMenu typeMenu) {
+    public static void printMenuSubTask(Scanner scanner, InMemoryTaskTaskManager manager, TypeMenu typeMenu) {
         int i = 1;
-        Task task = null;
-        boolean hideSubtask = true;
         String command;
         HashMap<Integer, TypeMenusAndTasks> tasksMenu;
         System.out.println("*******************************");
-        System.out.println("Меню "+ typeMenu.getTitle().toLowerCase());
+        System.out.println("Меню " + typeMenu.getTitle().toLowerCase());
         System.out.println("Выберите тип задачи:");
         tasksMenu = new HashMap<>();
         if (typeMenu == TypeMenu.CREATE) {
@@ -49,15 +45,14 @@ public class PrintMenu {
                 }
                 tasksMenu.put(i++, new TypeMenusAndTasks(typeMenu, TypeTask.EPIC));
             }
-            if (typeMenu == TypeMenu.REMOVE){
-                tasksMenu.put(i++, new TypeMenusAndTasks(TypeMenu.REMOVEALL,TypeTask.ALL));
+            if (typeMenu == TypeMenu.REMOVE) {
+                tasksMenu.put(i, new TypeMenusAndTasks(TypeMenu.REMOVEALL, TypeTask.ALL));
             }
         }
         if (tasksMenu.isEmpty()) {
             System.out.println("Нет созданных задач.");
             return;
         }
-
         for (int j = 1; j <= tasksMenu.size(); j++) {
             System.out.println(j + "." + " " + tasksMenu.get(j).getTypeTask().getTitle());
         }
@@ -66,12 +61,8 @@ public class PrintMenu {
         int commandInt = Integer.parseInt(command);
         if (tasksMenu.get(commandInt) != null) {
             manager.NewTasks(tasksMenu.get(commandInt).getTypeMenu(), tasksMenu.get(commandInt).getTypeTask());
-
         } else {
             System.out.println("Команда не найдена");
-
         }
-
-
     }
 }

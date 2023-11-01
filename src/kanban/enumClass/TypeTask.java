@@ -6,7 +6,7 @@ public enum TypeTask {
     EPIC("Эпик"),
     ALL("Все");
 
-    String title;
+    final String title;
 
     TypeTask(String title){
         this.title=title;
