@@ -1,24 +1,36 @@
 package kanban.model;
 
 import kanban.enumClass.Status;
+import kanban.enumClass.TypeTask;
 
 public class Task {
     private final String nameTask;//обновление идет полным объектом Task
     private final String description;
     private Integer uin;
     private Status status;
+    private final TypeTask typeTask;
 
     public Task(String nameTask, String description) {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
         uin = null;
+        this.typeTask = TypeTask.TASK;
+    }
+
+    public Task(String nameTask, String description, TypeTask typeTask) {
+        this.nameTask = nameTask;
+        this.description = description;
+        this.status = Status.NEW;
+        uin = null;
+        this.typeTask = typeTask;
     }
 
     public Task(String nameTask, String description, int uin) {
         this.nameTask = nameTask;
         this.description = description;
         this.uin = uin;
+        this.typeTask = TypeTask.TASK;
     }
 
     public Task(String nameTask, String description, int uin, Status status) {
@@ -26,18 +38,15 @@ public class Task {
         this.description = description;
         this.uin = uin;
         this.status = status;
-    }
-
-    public void setUin(int uin) {
-        this.uin = uin;
+        this.typeTask = TypeTask.TASK;
     }
 
     public int getUin() {
         return uin;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setUin(int uin) {
+        this.uin = uin;
     }
 
     public String getNameTask() {
@@ -46,6 +55,18 @@ public class Task {
 
     public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public TypeTask getTypeTask() {
+        return typeTask;
     }
 
     @Override

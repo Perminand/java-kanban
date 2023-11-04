@@ -1,21 +1,19 @@
 package kanban.service;
 
 import kanban.enumClass.Status;
-import kanban.enumClass.TypeMenu;
-import kanban.enumClass.TypeTask;
-import kanban.interfaces.TaskManager;
-import kanban.model.*;
+import kanban.model.Epic;
+import kanban.model.SubTask;
+import kanban.model.Task;
 
-import java.util.*;
-
-import static kanban.enumClass.TypeTask.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryTaskTaskManager implements TaskManager {
-    InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
-    Scanner scanner = new Scanner(System.in);
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
     private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
+    InMemoryHistoryManager historyManager = new Managers().getDefaultHistory();
     private int uin = 0;
 
     @Override
@@ -24,9 +22,6 @@ public class InMemoryTaskTaskManager implements TaskManager {
         int key = getUin();
         task.setUin(key);
         mapTask.put(key, task);
-        historyManager.addFullTask(TypeMenu.CREATE+ " " + task);
-        System.out.println("Операция выполнена успешно");
-        System.out.println();
     }
 
     @Override
@@ -38,21 +33,16 @@ public class InMemoryTaskTaskManager implements TaskManager {
         if (epic == null) return;
         mapSubTask.put(key, subTask);
         epic.getIdSubTask().add(subTask.getUin());
-        historyManager.addFullTask(TypeMenu.CREATE + " " + subTask);
         statusCalc(epic);
-        System.out.println("Операция выполнена успешно");
-        System.out.println();
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public int createEpic(Epic epic) {
         int key = getUin();
         epic.setUin(key);
         epic.setStatus(Status.NEW);
         mapEpic.put(key, epic);
-        historyManager.addFullTask(TypeMenu.CREATE + " " + epic);
-        System.out.println("Операция выполнена успешно");
-        System.out.println();
+        return key;
     }
 
     @Override
@@ -85,8 +75,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
     public Task getTask(int id) {
         if (mapTask.get(id) != null) {
             Task task = mapTask.get(id);
-            historyManager.addGetTask(task);
-            historyManager.addFullTask(TypeMenu.GET + " " + task);
+            historyManager.add(task);
             return task;
         }
         return null;
@@ -96,8 +85,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
     public SubTask getSubTask(int id) {
         if (mapSubTask.get(id) != null) {
             SubTask task = mapSubTask.get(id);
-            historyManager.addGetTask(task);
-            historyManager.addFullTask(TypeMenu.GET + " " + task);
+            historyManager.add(task);
             return mapSubTask.get(id);
         }
         return null;
@@ -107,18 +95,9 @@ public class InMemoryTaskTaskManager implements TaskManager {
     public Epic getEpic(int id) {
         if (mapEpic.get(id) != null) {
             Epic task = mapEpic.get(id);
-            historyManager.addGetTask(task);
-            historyManager.addFullTask(TypeMenu.GET + " " + task);
+            historyManager.add(task);
             return task;
         }
-        return null;
-    }
-
-    public Task getFindById(int id) {
-        if (id < 0) return null;
-        if (mapTask.get(id) != null) return mapTask.get(id);
-        if (mapEpic.get(id) != null) return mapEpic.get(id);
-        if (mapSubTask.get(id) != null) return mapSubTask.get(id);
         return null;
     }
 
@@ -127,20 +106,17 @@ public class InMemoryTaskTaskManager implements TaskManager {
         if (id < 0) return;
         if (mapTask.get(id) != null) {
             mapTask.remove(id);
-            System.out.println("Задача удалена");
             return;
         }
         if (mapEpic.get(id) != null) {
             Epic epic = mapEpic.get(id);
             removeAllSubTaskByEpic(epic);
             mapEpic.remove(id);
-            System.out.println("Задача удалена");
         }
         if (mapSubTask.get(id) != null) {
             Epic epic = mapEpic.get(mapSubTask.get(id).getEpicId());
             mapSubTask.remove(id);
             epic.getIdSubTask().remove((Integer) id);
-            System.out.println("Задача удалена");
             statusCalc(epic);
         }
     }
@@ -164,6 +140,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
         mapSubTask.clear();
         mapEpic.clear();
     }
+
     public ArrayList<SubTask> getSubTaskByIdEpic(Epic epic) {
         ArrayList<SubTask> arr = new ArrayList<>();
         for (Integer i : epic.getIdSubTask()) {
@@ -184,166 +161,32 @@ public class InMemoryTaskTaskManager implements TaskManager {
         return new ArrayList<>(mapSubTask.values());
     }
 
-    public InMemoryHistoryManager getHistoryManager() {
-        return historyManager;
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
-    private void removeAllNewTask() {
-        removeAllTask();
-        removeAllSubTask();
-        removeAllEpic();
-        System.out.println("Операция выполнена успешно");
-    }
-
-    public void NewTasks(TypeMenu typeMenu, TypeTask typeTask) {
-        if (typeMenu == TypeMenu.CREATE) {
-            createNewTask(typeTask);
-        } else if (typeMenu == TypeMenu.UPDATE) {
-            updateNewTask(typeTask);
-        } else if (typeMenu == TypeMenu.GET) {
-            getNewTask(typeTask);
-        } else if (typeMenu == TypeMenu.REMOVE) {
-            deleteNewTask();
-        } else if (typeMenu == TypeMenu.REMOVEALL) {
-            removeAllNewTask();
+    public Task getById(int id) {
+        if (id < 0) return null;
+        if (mapTask.get(id) != null) {
+            Task task = mapTask.get(id);
+            historyManager.add(task);
+            return task;
         }
-    }
-
-    private void deleteNewTask() {
-        System.out.println("Введите id задачи:");
-        String idTask = scanner.nextLine();
-        deleteById(Integer.parseInt(idTask));
-    }
-
-    private void getNewTask(TypeTask typeTask) {
-        System.out.println("введите id задачи:");
-        String idTask = scanner.nextLine();
-        Task task;
-        if (typeTask == TypeTask.TASK) {
-            task = getTask(Integer.parseInt(idTask));
-            if (task == null) {
-                System.out.println("Задача не найдена");
-            } else {
-                System.out.println(task);
-
-                System.out.println("Операция выполнена");
-            }
-
-        } else if (typeTask == TypeTask.SUBTASK) {
-            task = getSubTask(Integer.parseInt(idTask));
-            if (task == null) {
-                System.out.println("Задача не найдена");
-            } else {
-                historyManager.addGetTask(task);
-                historyManager.addFullTask(TypeMenu.GET + " " + task);
-                System.out.println(task);
-                System.out.println("Операция выполнена");
-            }
-        } else if (typeTask == TypeTask.EPIC) {
-            task = getEpic(Integer.parseInt(idTask));
-            if (task == null) {
-                System.out.println("Задача не найдена");
-            } else {
-                historyManager.addGetTask(task);
-                historyManager.addFullTask(TypeMenu.GET + " " + task);
-                System.out.println(task);
-                System.out.println("Операция выполнена");
-            }
+        if (mapEpic.get(id) != null) {
+            Epic task = mapEpic.get(id);
+            historyManager.add(task);
+            return task;
         }
+        if (mapSubTask.get(id) != null) {
+            SubTask task = mapSubTask.get(id);
+            historyManager.add(task);
+            return mapSubTask.get(id);
+        }
+        return null;
     }
 
-    private void createNewTask(TypeTask typeTask) {
-        System.out.print("Введите название:");
-        String nameTask = scanner.nextLine();
-        System.out.print("Введите описание:");
-        String description = scanner.nextLine();
-        if (typeTask == TASK) {
-            createTask(new Task(nameTask, description));
-        } else if (typeTask == TypeTask.SUBTASK) {
-            ArrayList<Integer> listIdEpic = new ArrayList<>();
-            for (Epic epic : mapEpic.values()) {
-                listIdEpic.add(epic.getUin());
-            }
-            System.out.println("Доступные эпики:");
-            for (Integer i : listIdEpic) {
-                System.out.println("id=" + i + " Название:" + getEpic(i).getNameTask() + " Описание:"
-                        + getEpic(i).getNameTask());
-            }
-            System.out.print("Введите id эпика:");
-            String idEpic = scanner.nextLine();
-            for (Integer id : listIdEpic) {
-                if (id == Integer.parseInt(idEpic)) {
-                    createSubTask(new SubTask(nameTask, description, Integer.parseInt(idEpic)));
-                } else {
-                    System.out.println("Нет эпика с указанным id.");
-                }
-            }
-        } else {
-            createEpic(new Epic(nameTask, description));
-        }
-    }
-
-    private void updateNewTask(TypeTask typeTask) {
-        System.out.print("Введите название:");
-        String nameTask = scanner.nextLine();
-        System.out.print("Введите описание:");
-        String description = scanner.nextLine();
-        if (typeTask == TASK) {
-            System.out.println("Введите id задачи");
-            int uin = Integer.parseInt(scanner.nextLine());
-            if (getTask(uin) == null) {
-                System.out.println("Нет такой задачи");
-                return;
-            }
-            System.out.println("Статус задачи поменялся?");
-            System.out.println("1.Да");
-            System.out.println("2.Нет");
-            System.out.print("Введите команду:");
-            String status = scanner.nextLine();
-            Status newStatus = null;
-            switch (status) {
-                case "1":
-                    System.out.println("Выберите новый статус");
-                    System.out.println("1." + Status.NEW);
-                    System.out.println("2." + Status.IN_PROGRESS);
-                    System.out.println("3." + Status.DONE);
-                    String choice = scanner.nextLine();
-                    switch (choice) {
-                        case "1":
-                            newStatus = Status.NEW;
-                            break;
-                        case "2":
-                            newStatus = Status.IN_PROGRESS;
-                            break;
-                        case "3":
-                            newStatus = Status.DONE;
-                            break;
-                        default:
-                            System.out.println("Нет такой команды");
-                    }
-                    updateTask(new Task(nameTask, description, uin, newStatus));
-                    break;
-                case "2":
-                    Task task = getTask(uin);
-                    newStatus = task.getStatus();
-                    updateTask(new Task(nameTask, description, uin, newStatus));
-                    break;
-                default:
-                    System.out.println("Нет такой команды");
-            }
-        } else if (typeTask == TypeTask.SUBTASK) {
-            System.out.print("Введите id подзадачи:");
-            String id = scanner.nextLine();
-            SubTask subTask = mapSubTask.get(Integer.parseInt(id));
-            int epicId = subTask.getEpicId();
-            updateSubTask(new SubTask(nameTask, description, epicId));
-        } else {
-            System.out.print("Введите id эпика':");
-            String id = scanner.nextLine();
-            updateEpic(new Epic(nameTask, description, Integer.parseInt(id)));
-        }
-    }
-        private void removeAllSubTaskByEpic(Epic epic) {
+    private void removeAllSubTaskByEpic(Epic epic) {
         ArrayList<Integer> listSubTask = epic.getIdSubTask();
         if (listSubTask.isEmpty()) return;
         for (int i = 0; i < listSubTask.size(); i++) {
