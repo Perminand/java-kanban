@@ -1,12 +1,14 @@
 package kanban.model;
 
+import kanban.enumClass.TypeTask;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
     private ArrayList<Integer> idSubTask;
 
-    public Epic(String nameEpic, String discription) {
-        super(nameEpic, discription);
+    public Epic(String nameEpic, String description) {
+        super(nameEpic, description, TypeTask.EPIC);
         this.idSubTask = new ArrayList<>();
     }
 

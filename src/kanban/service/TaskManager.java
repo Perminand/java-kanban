@@ -1,4 +1,4 @@
-package kanban.interfaces;
+package kanban.service;
 
 import kanban.model.Epic;
 import kanban.model.SubTask;
@@ -11,7 +11,7 @@ public interface TaskManager {
 
     void createSubTask(SubTask subTask);
 
-    void createEpic(Epic epic);
+    int createEpic(Epic epic);
 
     void updateSubTask(SubTask subTask);
 
@@ -32,4 +32,6 @@ public interface TaskManager {
     void removeAllSubTask();
 
     void removeAllEpic();
+
+    List<Task> getHistory();
 }
