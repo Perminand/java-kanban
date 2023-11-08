@@ -18,7 +18,7 @@ public class Task {
         this.typeTask = TypeTask.TASK;
     }
 
-    public Task(String nameTask, String description, TypeTask typeTask) {
+    protected Task(String nameTask, String description, TypeTask typeTask) {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
@@ -26,7 +26,7 @@ public class Task {
         this.typeTask = typeTask;
     }
 
-    public Task(String nameTask, String description, int uin) {
+    protected Task(String nameTask, String description, int uin) {
         this.nameTask = nameTask;
         this.description = description;
         this.uin = uin;
@@ -49,24 +49,12 @@ public class Task {
         this.uin = uin;
     }
 
-    public String getNameTask() {
-        return nameTask;
-    }
-
     public Status getStatus() {
         return status;
     }
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public TypeTask getTypeTask() {
-        return typeTask;
     }
 
     @Override
@@ -77,5 +65,9 @@ public class Task {
                 ", uin=" + uin +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    public TypeTask getTypeTask() {
+        return typeTask;
     }
 }

@@ -4,11 +4,13 @@ import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
-import kanban.service.InMemoryTaskTaskManager;
+import kanban.service.Managers;
+import kanban.service.TaskManager;
+
 
 public class Kanban {
     public static void main(String[] args) {
-        InMemoryTaskTaskManager manager = new InMemoryTaskTaskManager();
+        TaskManager manager= Managers.getDefault();
         System.out.println("Создаем десять задачи:");
         manager.createTask(new Task("Задача1", "Описание1"));
         manager.createTask(new Task("Задача2", "Описание2"));
@@ -47,15 +49,15 @@ public class Kanban {
             System.out.println(task);
         }
         System.out.println("************************************************************************");
-        System.out.println("Список эпик");
+        System.out.println("Список Epic");
         for (Task task : manager.getMapEpic()) {
             System.out.println(task);
         }
-        System.out.println("Список СубТаск");
+        System.out.println("Список SubTask");
         for (Task task : manager.getMapSubTask()) {
             System.out.println(task);
         }
-        System.out.println("Список Таск");
+        System.out.println("Список Task");
         for (Task task : manager.getMapTask()) {
             System.out.println(task);
         }

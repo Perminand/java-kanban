@@ -13,7 +13,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
     private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
-    InMemoryHistoryManager historyManager = new Managers().getDefaultHistory();
+    private final HistoryManager historyManager = new Managers().getDefaultHistory();
     private int uin = 0;
 
     @Override
@@ -73,8 +73,8 @@ public class InMemoryTaskTaskManager implements TaskManager {
 
     @Override
     public Task getTask(int id) {
-        if (mapTask.get(id) != null) {
-            Task task = mapTask.get(id);
+        Task task = mapTask.get(id);
+        if (task != null) {
             historyManager.add(task);
             return task;
         }
@@ -83,8 +83,8 @@ public class InMemoryTaskTaskManager implements TaskManager {
 
     @Override
     public SubTask getSubTask(int id) {
-        if (mapSubTask.get(id) != null) {
-            SubTask task = mapSubTask.get(id);
+        SubTask task = mapSubTask.get(id);
+        if (task != null) {
             historyManager.add(task);
             return mapSubTask.get(id);
         }
@@ -93,8 +93,8 @@ public class InMemoryTaskTaskManager implements TaskManager {
 
     @Override
     public Epic getEpic(int id) {
-        if (mapEpic.get(id) != null) {
-            Epic task = mapEpic.get(id);
+        Epic task = mapEpic.get(id);
+        if (task != null) {
             historyManager.add(task);
             return task;
         }
@@ -152,11 +152,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
     public ArrayList<Task> getMapTask() {
         return new ArrayList<>(mapTask.values());
     }
-
-    public ArrayList<Epic> getMapEpic() {
-        return new ArrayList<>(mapEpic.values());
-    }
-
+    public ArrayList<Epic> getMapEpic() {return new ArrayList<>(mapEpic.values());  }
     public ArrayList<SubTask> getMapSubTask() {
         return new ArrayList<>(mapSubTask.values());
     }

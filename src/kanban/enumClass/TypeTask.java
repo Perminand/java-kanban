@@ -10,7 +10,4 @@ public enum TypeTask {
         this.title = title;
     }
 
-    public String getTitle() {
-        return title;
-    }
 }
