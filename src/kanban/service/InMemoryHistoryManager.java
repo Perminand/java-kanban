@@ -8,7 +8,6 @@ import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private static final byte SIZE_HISTORY = 10;
     private final CustomLinkedList<Task> history = new CustomLinkedList<>();
     public HashMap<Integer, Node<Task>> idNodeForCustomLinkedList = new HashMap<>();
 

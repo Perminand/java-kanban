@@ -1,7 +1,7 @@
 package kanban.model;
 
 public class Node<E> {
-    private E item;
+    private final E item;
     private Node<E> pref;
     private Node<E> next;
 

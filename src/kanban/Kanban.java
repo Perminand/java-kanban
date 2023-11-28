@@ -4,7 +4,6 @@ import kanban.model.Epic;
 import kanban.model.Node;
 import kanban.model.SubTask;
 import kanban.model.Task;
-import kanban.service.InMemoryHistoryManager;
 import kanban.service.Managers;
 import kanban.service.TaskManager;
 
@@ -12,7 +11,6 @@ import kanban.service.TaskManager;
 public class Kanban {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
-        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
         System.out.println("Создаем две задачи:");
         manager.createTask(new Task("Задача1", "Описание1"));
         manager.createTask(new Task("Задача2", "Описание2"));
