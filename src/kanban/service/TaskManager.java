@@ -1,11 +1,11 @@
 package kanban.service;
 
 import kanban.model.Epic;
+import kanban.model.Node;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public interface TaskManager {
     void createTask(Task task);
@@ -19,7 +19,6 @@ public interface TaskManager {
     void updateEpic(Epic epic);
 
     void updateTask(Task task);
-
 
     Task getTask(int id);
 
@@ -35,11 +34,13 @@ public interface TaskManager {
 
     void removeAllEpic();
 
-    List<Task> getHistory();
+    ArrayList<Node<Task>> getHistory();
 
     ArrayList<Task> getMapTask();
-    ArrayList<Epic> getMapEpic();
-    ArrayList<SubTask>getMapSubTask();
 
-        Task getById(int i);
+    ArrayList<Epic> getMapEpic();
+
+    ArrayList<SubTask> getMapSubTask();
+
+    Task getById(int i);
 }

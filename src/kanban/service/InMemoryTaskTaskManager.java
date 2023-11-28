@@ -2,12 +2,12 @@ package kanban.service;
 
 import kanban.enumClass.Status;
 import kanban.model.Epic;
+import kanban.model.Node;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class InMemoryTaskTaskManager implements TaskManager {
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
@@ -106,7 +106,6 @@ public class InMemoryTaskTaskManager implements TaskManager {
         if (id < 0) return;
         if (mapTask.get(id) != null) {
             mapTask.remove(id);
-            return;
         }
         if (mapEpic.get(id) != null) {
             Epic epic = mapEpic.get(id);
@@ -119,11 +118,13 @@ public class InMemoryTaskTaskManager implements TaskManager {
             epic.getIdSubTask().remove((Integer) id);
             statusCalc(epic);
         }
+        historyManager.remove(id);
     }
 
     @Override
     public void removeAllTask() {
         mapTask.clear();
+
     }
 
     @Override
@@ -152,13 +153,17 @@ public class InMemoryTaskTaskManager implements TaskManager {
     public ArrayList<Task> getMapTask() {
         return new ArrayList<>(mapTask.values());
     }
-    public ArrayList<Epic> getMapEpic() {return new ArrayList<>(mapEpic.values());  }
+
+    public ArrayList<Epic> getMapEpic() {
+        return new ArrayList<>(mapEpic.values());
+    }
+
     public ArrayList<SubTask> getMapSubTask() {
         return new ArrayList<>(mapSubTask.values());
     }
 
     @Override
-    public List<Task> getHistory() {
+    public ArrayList<Node<Task>> getHistory() {
         return historyManager.getHistory();
     }
 
@@ -186,7 +191,8 @@ public class InMemoryTaskTaskManager implements TaskManager {
         ArrayList<Integer> listSubTask = epic.getIdSubTask();
         if (listSubTask.isEmpty()) return;
         for (int i = 0; i < listSubTask.size(); i++) {
-            mapSubTask.remove(i);
+            mapSubTask.remove(listSubTask.get(i));
+            historyManager.remove(listSubTask.get(i));
         }
         epic.setStatus(Status.NEW);
     }
