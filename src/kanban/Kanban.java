@@ -15,11 +15,11 @@ public class Kanban {
         manager.createTask(new Task("Задача1", "Описание1"));
         manager.createTask(new Task("Задача2", "Описание2"));
         System.out.println("Создаем эпик");
-        manager.createEpic(new Epic("Эпик1", "Описание1"));
+        int idEpic = manager.createEpic(new Epic("Эпик1", "Описание1"));
         System.out.println("Создаем три подзадачи:");
-        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", 2));
-        manager.createSubTask(new SubTask("Подзадача2", "Описание подзадачи2", 2));
-        manager.createSubTask(new SubTask("Подзадача3", "Описание подзадачи3", 2));
+        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic));
+        manager.createSubTask(new SubTask("Подзадача2", "Описание подзадачи2", idEpic));
+        manager.createSubTask(new SubTask("Подзадача3", "Описание подзадачи3", idEpic));
 
         System.out.println("Получаем Task");
         System.out.println(manager.getTask(0));

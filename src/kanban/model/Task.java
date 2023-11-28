@@ -4,7 +4,7 @@ import kanban.enumClass.Status;
 import kanban.enumClass.TypeTask;
 
 public class Task {
-    private final String nameTask;//обновление идет полным объектом Task
+    private final String nameTask;
     private final String description;
     private final TypeTask typeTask;
     private Integer uin;
