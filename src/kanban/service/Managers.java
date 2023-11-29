@@ -2,9 +2,9 @@ package kanban.service;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskTaskManager(); }
+        return new InMemoryTaskManager(); }
 
-    public InMemoryHistoryManager getDefaultHistory() {
+    public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 

@@ -2,18 +2,17 @@ package kanban.service;
 
 import kanban.enumClass.Status;
 import kanban.model.Epic;
-import kanban.model.Node;
 import kanban.model.SubTask;
 import kanban.model.Task;
-
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InMemoryTaskTaskManager implements TaskManager {
+public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> mapTask = new HashMap<>();
     private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
-    private final HistoryManager historyManager = new Managers().getDefaultHistory();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
     private int uin = 0;
 
     @Override
@@ -163,7 +162,7 @@ public class InMemoryTaskTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Node<Task>> getHistory() {
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 

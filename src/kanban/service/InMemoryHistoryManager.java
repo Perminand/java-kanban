@@ -2,69 +2,54 @@ package kanban.service;
 
 import kanban.model.Node;
 import kanban.model.Task;
-
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
     private final CustomLinkedList<Task> history = new CustomLinkedList<>();
-    private final HashMap<Integer, Node<Task>> idNodeForCustomLinkedList = new HashMap<>();
+    private final HashMap<Integer, Node<Task>> nodeMap = new HashMap<>();
 
 
     @Override
     public void add(Task task) {
-        Node<Task> node = history.add(task);
-        history.removeNode(idNodeForCustomLinkedList.get(task.getUin()));
-        idNodeForCustomLinkedList.put(task.getUin(), node);
+        Node<Task> node = history.linkLast(task);
+        history.removeNode(nodeMap.get(task.getUin()));
+        nodeMap.put(task.getUin(), node);
 
     }
 
     @Override
     public void remove(int id) {
-        history.removeNode(idNodeForCustomLinkedList.get(id));
-        idNodeForCustomLinkedList.remove(id);
+        history.removeNode(nodeMap.get(id));
+        nodeMap.remove(id);
     }
 
     @Override
-    public ArrayList<Node<Task>> getHistory() {
-        ArrayList<Node<Task>> arrayList = new ArrayList<>();
-        for (Node<Task> x = history.first; x != null; x = x.getNext()) {
-            arrayList.add(x);
+    public List<Task> getHistory() {
+        List<Task> list = new ArrayList<>();
+        Node<Task> node = history.first;
+        while (node != null){
+            list.add(node.getItem());
+            node=node.getNext();
         }
-        return arrayList;
+        return List.copyOf(list);
     }
 
     public static class CustomLinkedList<E> {
         Node<E> first;
         Node<E> last;
-        transient int size = 0;
+        int size = 0;
 
-        public Node<E> add(E e) {
-            Node<E> oldNode = first;
-            final Node<E> newNode = new Node<>(null, e, oldNode);
-            first = newNode;
-            if (oldNode == null) last = newNode;
-            else oldNode.setPref(newNode);
-            size++;
-            return newNode;
-        }
-
-        public void remove(E e) {
-            for (Node<E> x = first; x != null; x = x.getNext()) {
-                if (x == e) {
-                    removeNode(x);
-                }
-            }
-        }
-
-        public void linkLast(E e) {
+        public Node<E> linkLast(E e) {
             final Node<E> oldNode = last;
             final Node<E> newNode = new Node<>(oldNode, e, null);
             last = newNode;
             if (oldNode == null) first = newNode;
             else oldNode.setNext(newNode);
             size++;
+            return newNode;
         }
 
         public void removeNode(Node<E> node) {

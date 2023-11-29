@@ -1,10 +1,10 @@
 package kanban.service;
 
 import kanban.model.Epic;
-import kanban.model.Node;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public interface TaskManager {
@@ -34,7 +34,7 @@ public interface TaskManager {
 
     void removeAllEpic();
 
-    ArrayList<Node<Task>> getHistory();
+    List<Task> getHistory();
 
     ArrayList<Task> getMapTask();
 
