@@ -4,15 +4,16 @@ import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
-import java.util.List;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> mapTask = new HashMap<>();
-    private final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
-    private final HashMap<Integer, Epic> mapEpic = new HashMap<>();
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final HashMap<Integer, Task> mapTask = new HashMap<>();
+    protected final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
+    protected final HashMap<Integer, Epic> mapEpic = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
     private int uin = 0;
 
     @Override

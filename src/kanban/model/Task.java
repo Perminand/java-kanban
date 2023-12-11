@@ -33,7 +33,7 @@ public class Task {
         this.typeTask = TypeTask.TASK;
     }
 
-    public Task(String nameTask, String description, int uin, Status status) {
+    public Task(int uin, String nameTask, String description,  Status status) {
         this.nameTask = nameTask;
         this.description = description;
         this.uin = uin;
@@ -57,6 +57,18 @@ public class Task {
         this.status = status;
     }
 
+    public TypeTask getTypeTask() {
+        return typeTask;
+    }
+
+    public String getNameTask() {
+        return nameTask;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -65,9 +77,5 @@ public class Task {
                 ", uin=" + uin +
                 ", status='" + status + '\'' +
                 '}';
-    }
-
-    public TypeTask getTypeTask() {
-        return typeTask;
     }
 }

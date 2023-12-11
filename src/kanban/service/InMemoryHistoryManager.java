@@ -2,9 +2,10 @@ package kanban.service;
 
 import kanban.model.Node;
 import kanban.model.Task;
-import java.util.List;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -30,9 +31,9 @@ public class InMemoryHistoryManager implements HistoryManager {
     public List<Task> getHistory() {
         List<Task> list = new ArrayList<>();
         Node<Task> node = history.first;
-        while (node != null){
+        while (node != null) {
             list.add(node.getItem());
-            node=node.getNext();
+            node = node.getNext();
         }
         return List.copyOf(list);
     }

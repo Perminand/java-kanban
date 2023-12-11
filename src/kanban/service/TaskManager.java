@@ -4,8 +4,8 @@ import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
     void createTask(Task task);

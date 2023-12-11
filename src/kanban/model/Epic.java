@@ -1,5 +1,6 @@
 package kanban.model;
 
+import kanban.enumClass.Status;
 import kanban.enumClass.TypeTask;
 
 import java.util.ArrayList;
@@ -12,8 +13,12 @@ public class Epic extends Task {
         this.idSubTask = new ArrayList<>();
     }
 
-    public Epic(String nameEpic, String description, int uin) {//При создании обновления
+    public Epic(String nameEpic, String description, int uin) {
         super(nameEpic, description, uin);
+    }
+    public Epic(int id, String nameEpic, String description, Status status) {
+        super(id,nameEpic, description, status);
+
     }
 
     public ArrayList<Integer> getIdSubTask() {
