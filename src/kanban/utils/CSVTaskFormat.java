@@ -1,13 +1,15 @@
-package kanban.service;
+package kanban.utils;
 
 import kanban.enumClass.Status;
 import kanban.enumClass.TypeTask;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
+import kanban.service.HistoryManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 
 public class CSVTaskFormat {
@@ -23,13 +25,15 @@ public class CSVTaskFormat {
                 String.valueOf(task.getDescription()), String.valueOf(task.getEpicId()));
     }
 
-    static String historyToString(HistoryManager manager) {
+    public static String historyToString(HistoryManager manager) {
         List<Task> listTask = manager.getHistory();
         String stringHistory = "";
         if (!listTask.isEmpty()) {
             for (Task task : listTask) {
                 if (!(stringHistory.equals(""))) {
-                    stringHistory = String.join(",", stringHistory, String.valueOf(task.getUin()));
+                    stringHistory = String.valueOf(new StringJoiner(",")
+                            .add(stringHistory)
+                            .add(String.valueOf(task.getUin())));
                 } else {
                     stringHistory = String.valueOf(task.getUin());
                 }
@@ -54,7 +58,7 @@ public class CSVTaskFormat {
         final Status status = Status.valueOf(values[3]);
         final String descriptions = values[4];
         if (type == TypeTask.TASK)
-            return new Task(id, name, descriptions, status);
+            return new Task(id,type,name, descriptions, status);
         else if (type == TypeTask.SUBTASK) {
             final int epicId = Integer.parseInt(values[5]);
             return new SubTask(id, name, descriptions, status, epicId);

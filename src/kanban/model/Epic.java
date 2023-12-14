@@ -17,7 +17,7 @@ public class Epic extends Task {
         super(nameEpic, description, uin);
     }
     public Epic(int id, String nameEpic, String description, Status status) {
-        super(id,nameEpic, description, status);
+        super(id, TypeTask.EPIC, nameEpic, description, status);
 
     }
 

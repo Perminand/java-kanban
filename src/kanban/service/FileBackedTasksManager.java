@@ -4,6 +4,7 @@ import kanban.exceptions.ManagerSaveException;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
+import kanban.utils.CSVTaskFormat;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("История");
         System.out.println(manager.getHistory());
 
-        TaskManager newManager = FileBackedTasksManager.loadFromFile(new File("src/kanban/resources/Tasks"));
+        TaskManager newManager = FileBackedTasksManager.loadFromFile(new File("./resources/Tasks.csv"));
         System.out.println("*******************Новый менеджер*********************");
         System.out.println(newManager.getMapTask());
         System.out.println(newManager.getMapSubTask());
@@ -81,11 +82,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 if (!isHistory) {
                     Task task = CSVTaskFormat.stringFromTask(line);
-                    if (generatorId < task.getUin()) {
-                        generatorId = task.getUin();
+                    if (task != null) {
+                        if (generatorId < task.getUin()) {
+                            generatorId = task.getUin();
+                        }
+                        tasksManager.addTask(task);
+                        i++;
                     }
-                    tasksManager.addTask(task);
-                    i++;
                 } else {
                     List<Integer> idTask = CSVTaskFormat.historyFromString(line);
                     for (Integer id : idTask) {
@@ -94,30 +97,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
 
             }
-        } catch (FileNotFoundException e) {
-            throw new ManagerSaveException("Файл не найден");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ManagerSaveException("Файл не найден");
         }
         return tasksManager;
     }
 
     private void addTask(Task task) {
-        if (task.getClass().getSimpleName().toUpperCase().equals(String.valueOf(TASK))) {
-            mapTask.put(task.getUin(), task);
-        } else if (task.getClass().getSimpleName().toUpperCase().equals(String.valueOf(SUBTASK))) {
-            SubTask subTask = (SubTask) task;
-            int idEpic = subTask.getEpicId();
-            Epic epic = mapEpic.get(idEpic);
-            ArrayList<Integer> listIdSubTask = epic.getIdSubTask();
-            if (listIdSubTask == null)
-                listIdSubTask = new ArrayList<>();
-            listIdSubTask.add(subTask.getUin());
-            mapEpic.get(idEpic).setIdSubTask(listIdSubTask);
-            mapSubTask.put(subTask.getUin(), subTask);
-        } else if (task.getClass().getSimpleName().toUpperCase().equals(String.valueOf(EPIC))) {
-            mapEpic.put(task.getUin(), (Epic) task);
+        switch (task.getTypeTask()) {
+            case TASK:
+                mapTask.put(task.getUin(), task);
+                break;
+            case SUBTASK:
+                SubTask subTask = (SubTask) task;
+                int idEpic = subTask.getEpicId();
+                Epic epic = mapEpic.get(idEpic);
+                ArrayList<Integer> listIdSubTask = epic.getIdSubTask();
+                if (listIdSubTask == null)
+                    listIdSubTask = new ArrayList<>();
+                listIdSubTask.add(subTask.getUin());
+                mapEpic.get(idEpic).setIdSubTask(listIdSubTask);
+                mapSubTask.put(subTask.getUin(), subTask);
+                break;
+            case EPIC:
+                mapEpic.put(task.getUin(), (Epic) task);
+                break;
         }
+
     }
 
     protected void save() {

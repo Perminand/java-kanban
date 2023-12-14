@@ -33,12 +33,12 @@ public class Task {
         this.typeTask = TypeTask.TASK;
     }
 
-    public Task(int uin, String nameTask, String description,  Status status) {
+    public Task(int uin, TypeTask typeTask, String nameTask, String description,  Status status) {
         this.nameTask = nameTask;
         this.description = description;
         this.uin = uin;
         this.status = status;
-        this.typeTask = TypeTask.TASK;
+        this.typeTask = typeTask;
     }
 
     public int getUin() {
