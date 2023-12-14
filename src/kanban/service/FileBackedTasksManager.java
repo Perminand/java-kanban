@@ -1,5 +1,6 @@
 package kanban.service;
 
+import kanban.enumClass.Status;
 import kanban.exceptions.ManagerSaveException;
 import kanban.model.Epic;
 import kanban.model.SubTask;
@@ -43,6 +44,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(manager.getSubTask(4));
         System.out.println(manager.getSubTask(5));
         System.out.println(manager.getEpic(idEpic2));
+        manager.getSubTask(4).setStatus(Status.DONE);
+        manager.getSubTask(5).setStatus(Status.DONE);
+        manager.getSubTask(6).setStatus(Status.DONE);
         System.out.println("*****************Первый менеджер*****************");
         System.out.println(manager.getMapTask());
         System.out.println(manager.getMapSubTask());
