@@ -11,8 +11,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static kanban.enumClass.TypeTask.*;
-
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     File file;
@@ -104,6 +102,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } catch (IOException e) {
             throw new ManagerSaveException("Файл не найден");
         }
+        tasksManager.setUin(generatorId);
         return tasksManager;
     }
 

@@ -27,24 +27,18 @@ public class CSVTaskFormat {
 
     public static String historyToString(HistoryManager manager) {
         List<Task> listTask = manager.getHistory();
-        String stringHistory = "";
+        StringJoiner sj = new StringJoiner(",");
         if (!listTask.isEmpty()) {
             for (Task task : listTask) {
-                if (!(stringHistory.equals(""))) {
-                    stringHistory = String.valueOf(new StringJoiner(",")
-                            .add(stringHistory)
-                            .add(String.valueOf(task.getUin())));
-                } else {
-                    stringHistory = String.valueOf(task.getUin());
-                }
+                sj.add(String.valueOf(task.getUin()));
             }
         }
-        return stringHistory;
+        return sj.toString();
     }
 
     public static List<Integer> historyFromString(String value) {
         ArrayList<Integer> list = new ArrayList<>();
-        for (String s : value.split(",")) {
+        for (String s :  value.split(",")) {
             list.add(Integer.parseInt(s));
         }
         return list;
@@ -58,7 +52,7 @@ public class CSVTaskFormat {
         final Status status = Status.valueOf(values[3]);
         final String descriptions = values[4];
         if (type == TypeTask.TASK)
-            return new Task(id,type,name, descriptions, status);
+            return new Task(id, type, name, descriptions, status);
         else if (type == TypeTask.SUBTASK) {
             final int epicId = Integer.parseInt(values[5]);
             return new SubTask(id, name, descriptions, status, epicId);

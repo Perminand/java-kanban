@@ -219,4 +219,7 @@ public class InMemoryTaskManager implements TaskManager {
         return uin++;
     }
 
+    protected void setUin(int generatorId) {
+        this.uin=generatorId;
+    }
 }
