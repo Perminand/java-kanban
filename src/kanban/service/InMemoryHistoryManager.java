@@ -15,7 +15,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
+        if(task.getUin()==null) return;
         Node<Task> node = history.linkLast(task);
+
         history.removeNode(nodeMap.get(task.getUin()));
         nodeMap.put(task.getUin(), node);
 

@@ -1,0 +1,346 @@
+package kanban.tests;
+
+import kanban.enumClass.Status;
+import kanban.model.Epic;
+import kanban.model.SubTask;
+import kanban.model.Task;
+import kanban.service.InMemoryTaskManager;
+import kanban.service.TaskManager;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public abstract class TaskManagerTest<T extends TaskManager> {
+    final static String EX_MASSAGE_NO_ID_TASK = "Нет TASK с запрошенным ID";
+    protected T manager;
+    protected Task task;
+    protected SubTask subTask1;
+    protected SubTask subTask2;
+    protected SubTask subTask3;
+    protected Epic epic;
+    Duration duration = Duration.ofMinutes(60);
+    private int idEpic;
+
+    protected void initTasks() {
+        this.task = new Task("name1", "description1", duration);
+        this.epic = new Epic("name1", "description1");
+        this.idEpic = manager.createEpic(epic); // id 0
+        this.subTask1 = new SubTask("Подзадача1", "Описание подзадачи1", idEpic, duration);
+        this.subTask2 = new SubTask("Подзадача2", "Описание подзадачи2", idEpic, duration);
+        this.subTask3 = new SubTask("Подзадача3", "Описание подзадачи3", idEpic, duration);
+        manager.createSubTask(subTask1); // id 1
+        manager.createSubTask(subTask2); // id 2
+        manager.createSubTask(subTask3); // id 3
+        manager.createTask(task);        // id 4
+    }
+
+    @Test
+    void createTaskTest() {
+        Assertions.assertNotNull(manager.getTasks().get(0), "Задача не найдена");
+        Assertions.assertEquals(task, manager.getTasks().get(0), "Задачи не совпадают");
+        Assertions.assertSame(manager.getTasks().get(0).getStatus(), Status.NEW, "Статус не NEW");
+        Assertions.assertEquals(manager.getTasks().get(0).getUin(), 4, "UIN не назначается");
+
+        final List<Task> listTask = manager.getTasks();
+        Assertions.assertNotNull(listTask, "Задачи не возвращаются");
+        Assertions.assertEquals(1, listTask.size(), "Неверное количество задач");
+        Assertions.assertEquals(task, listTask.get(0), "Задачи не совпадают");
+        Assertions.assertNotNull(task.getStartTime(),"startTime null");
+        Assertions.assertNotNull(task.getDuration(),"Duration null");
+        Assertions.assertEquals(epic.getStartTime(),subTask1.getStartTime(), "startTime не null");
+        Assertions.assertEquals(epic.getDuration(),subTask1.getDuration().plus(
+                subTask2.getDuration().plus(subTask3.getDuration())),"Duration не null");
+        Assertions.assertNotNull(subTask1.getStartTime(),"startTime null");
+        Assertions.assertNotNull(subTask1.getDuration(),"Duration null");
+    }
+
+
+    @Test
+    void createSubTaskTest() {
+        SubTask subTask = new SubTask("Подзадача1", "Описание подзадачи1", idEpic,duration);
+        final int idSubTask = manager.createSubTask(subTask);
+        Task savedTask = manager.getSubTask(idSubTask);
+        Assertions.assertEquals(subTask, savedTask, "Задачи не совпадают");
+        Assertions.assertNotNull(savedTask, "Задача не найдена");
+        Assertions.assertSame(savedTask.getStatus(), Status.NEW, "Статус не NEW");
+
+
+        final List<SubTask> listSubTask = manager.getSubTasks();
+        Assertions.assertNotNull(listSubTask, "Задачи не возвращаются");
+        Assertions.assertEquals(4, listSubTask.size(), "Неверное количество задач");
+        Assertions.assertEquals(subTask, listSubTask.get(3), "Задачи не совпадают");
+        Assertions.assertEquals(subTask.getEpicId(), idEpic, "id эпик не совпадает");
+        manager.removeAllSubTask();
+        Assertions.assertNull(manager.getSubTask(1));
+
+    }
+
+    @Test
+    void createEpicTest() {
+        assertEquals(epic, manager.getEpic(idEpic), "Epic не совпадает");
+        assertEquals(epic.getStatus(), Status.NEW, "Статусы не NEW");
+        manager.removeAllSubTask();
+        Assertions.assertTrue(epic.getIdSubTask().isEmpty(), "Список не пустой");
+        manager.createSubTask(new SubTask(1, "Подзадача1", "Описание подзадачи1", Status.DONE, idEpic, duration));
+        manager.createSubTask(new SubTask(2, "Подзадача2", "Описание подзадачи2", Status.DONE, idEpic, duration));
+        manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3", Status.DONE, idEpic, duration));
+        assertEquals(epic.getStatus(), Status.DONE, "Статусы не DONE");
+
+        manager.removeAllSubTask();
+        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic, duration));
+        manager.createSubTask(new SubTask(2, "Подзадача2", "Описание подзадачи2", Status.DONE, idEpic, duration));
+        manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3", Status.DONE, idEpic, duration));
+        assertEquals(epic.getStatus(), Status.IN_PROGRESS, "Статусы не IN_PROGRESS");
+
+        manager.removeAllSubTask();
+        manager.createSubTask(new SubTask(1, "Подзадача1", "Описание подзадачи1", Status.IN_PROGRESS, idEpic, duration));
+        manager.createSubTask(new SubTask(2, "Подзадача2", "Описание подзадачи2", Status.IN_PROGRESS, idEpic, duration));
+        manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3", Status.IN_PROGRESS, idEpic, duration));
+        assertEquals(epic.getStatus(), Status.IN_PROGRESS, "Статусы не IN_PROGRESS");
+
+        final List<Epic> listTask = manager.getEpics();
+        Assertions.assertNotNull(listTask, "Задачи не возвращаются");
+        Assertions.assertEquals(1, listTask.size(), "Неверное количество задач");
+        Assertions.assertEquals(epic, listTask.get(0), "Задачи не совпадают");
+    }
+
+    @Test
+    void updateTask_ValidId() {
+        manager.removeAllTask();
+        assertEquals(new ArrayList<Task>(), manager.getTasks(), "getTasks не пустой");
+        Task task = new Task("name1", "description1", duration);
+        int id = manager.createTask(task);
+        Task newTask = new Task(id, "newName1", "newDescription1", Status.DONE, duration);
+        manager.updateTask(newTask);
+        assertEquals(newTask, manager.getTask(id));
+    }
+
+    @Test
+    void updateTask_NoValidId() {
+        Task task = new Task("name1", "description1", duration);
+        int id = manager.createTask(task);
+        Task newTask = new Task(-1, "newName1", "newDescription1", Status.DONE, duration);
+        manager.updateTask(newTask);
+        assertNotEquals(manager.getTask(id), newTask);
+    }
+
+    @Test
+    void updateSubTask_ValidId() {
+        manager.removeAllSubTask();
+        assertEquals(new ArrayList<SubTask>(), manager.getSubTasks(), "getSubTasks не пустой");
+        Epic epic = new Epic("name1", "description");
+        int idEpic = manager.createEpic(epic);
+        SubTask subTask = new SubTask("name1", "description1", idEpic, duration);
+        int idSubTask = manager.createSubTask(subTask);
+        SubTask newSubTask = new SubTask(idSubTask, "newName1", "newDescription1", Status.DONE, idEpic, duration);
+        manager.updateSubTask(newSubTask);
+        assertSame(newSubTask, manager.getSubTask(newSubTask.getUin()));
+    }
+
+    @Test
+    void updateSubTask_NoValidId() {
+        SubTask subTasksValid1 = subTask1;
+        SubTask subTasksValid2 = subTask2;
+        SubTask subTasksValid3 = subTask3;
+        SubTask newSubTask = new SubTask(4, "newName1", "newDescription1", Status.DONE, 3, duration);
+        manager.updateSubTask(newSubTask);
+        assertTrue(subTasksValid1 == subTask1 && subTasksValid2 == subTask2 && subTasksValid3 == subTask3);
+    }
+
+    @Test
+    void updateEpic_ValidIEpicFormat() {
+        Epic newEpic2 = new Epic(idEpic, "name1", "description", Status.IN_PROGRESS);
+        manager.updateEpic(newEpic2);
+        Assertions.assertEquals(newEpic2.getStatus(), manager.getEpic(idEpic).getStatus());
+    }
+
+    @Test
+    void updateEpic_No_ValidIEpicFormat() {
+        manager.removeAllEpic();
+        assertEquals(new ArrayList<Epic>(), manager.getEpics(), "getEpic не пустой");
+        Epic epic = new Epic("name1", "description");
+        int idEpic = manager.createEpic(epic);
+        assertEquals(epic, manager.getEpic(idEpic));
+        Epic newEpic = new Epic("name1", "description");
+        manager.updateEpic(newEpic);
+        assertNotEquals(newEpic, manager.getEpic(idEpic));
+    }
+
+    @Test
+    void getTask_ValidId() {
+        task = new Task("name1", "description1", duration);
+        int idTask = manager.createTask(task);
+        Assertions.assertEquals(task, manager.getTask(idTask));
+    }
+
+    @Test
+    void getTask_NoValidId() {
+        Assertions.assertNull(manager.getTask(0));
+    }
+
+    @Test
+    void getSubTask_ValidId() {
+        Assertions.assertEquals(subTask1, manager.getSubTask(1));
+    }
+
+    @Test
+    void getSubTask_NoValidId() {
+        Assertions.assertNull(manager.getSubTask(-1));
+    }
+
+    @Test
+    void getEpic_ValidId() {
+        Assertions.assertEquals(epic, manager.getEpic(0));
+    }
+
+    @Test
+    void getEpic_NoValidId() {
+        manager.removeAllEpic();
+        Assertions.assertNull(manager.getEpic(0));
+    }
+
+    @Test
+    void deleteById_NoValidIdTask() {
+        int size = manager.getTasks().size();
+        for (Integer i : List.of(-1, 3, 23))
+            manager.deleteById(i);
+        Assertions.assertEquals(size, manager.getTasks().size());
+    }
+
+    @Test
+    void deleteById_NoValidIdSubTask() {
+        int size = manager.getSubTasks().size();
+        for (Integer i : List.of(-1, 4, 23))
+            manager.deleteById(i);
+        Assertions.assertEquals(size, manager.getSubTasks().size());
+    }
+
+    @Test
+    void deleteById_ValidIdEpic() {
+        int size = manager.getTasks().size();
+        manager.deleteById(4);
+        Assertions.assertEquals(size - 1, manager.getTasks().size(), "Элемент TASK не удалился");
+        size = manager.getSubTasks().size();
+        manager.deleteById(1);
+        Assertions.assertEquals(size - 1, manager.getSubTasks().size(), "Элемент SUBTASK не удалился");
+        size = manager.getEpics().size();
+        manager.deleteById(0);
+        Assertions.assertEquals(size - 1, manager.getEpics().size(), "Элемент EPIC не удалился");
+    }
+
+    @Test
+    void deleteById_NoValidIdEpic() {
+        int size = manager.getEpics().size();
+        for (Integer i : List.of(-1, 3, 23))
+            manager.deleteById(i);
+        Assertions.assertEquals(manager.getEpics().size(), size);
+    }
+
+
+    @Test
+    void removeAllTask() {
+        //Проверяем удаления списка TASK
+        manager.removeAllTask();
+        Assertions.assertTrue(manager.getTasks().isEmpty());
+    }
+
+    @Test
+    void removeAllSubTask() {
+        //Проверяем изменение статуса после удаление
+        for (SubTask subTask : manager.getSubTasks()) subTask.setStatus(Status.DONE);
+        InMemoryTaskManager.statusCalc(epic, manager.getSubTasks());
+        Assertions.assertEquals(Status.DONE, manager.getEpic(0).getStatus());
+        //Проверяем удаления списка SUBTASK
+        manager.removeAllSubTask();
+        Assertions.assertTrue(manager.getSubTasks().isEmpty());
+        Assertions.assertEquals(Status.NEW, manager.getEpic(0).getStatus(), "Статус не поменялся");
+        manager.removeAllSubTask();
+        Assertions.assertTrue(manager.getSubTasks().isEmpty());
+    }
+
+    @Test
+    void removeAllEpic() {
+        //Проверяем удаления списка Epic,Subtask
+        manager.removeAllEpic();
+        Assertions.assertTrue(manager.getEpics().isEmpty());
+        Assertions.assertTrue(manager.getSubTasks().isEmpty());
+        manager.removeAllEpic();
+        Assertions.assertEquals(new ArrayList<>(), manager.getEpics());
+    }
+
+    @Test
+    void getHistory_ValidIsEmpty() {
+        //Проверяем на пустую историю
+        Assertions.assertEquals(new ArrayList<Task>(), manager.getHistory());
+    }
+
+    @Test
+    void getHistory_Valid() {
+        manager.getById(0);
+        Assertions.assertEquals(manager.getById(0), manager.getHistory().get(0));
+    }
+
+    @Test
+    void getTasks_Valid() {
+        int size = manager.getTasks().size();
+        manager.createTask(new Task("n", "d", duration));
+        Assertions.assertEquals(manager.getTasks().size(), size + 1);
+    }
+
+    @Test
+    void getTasks_ValidIsEmpty() {
+        manager.removeAllTask();
+        Assertions.assertEquals(manager.getTasks().size(), 0);
+    }
+
+    @Test
+    void getSubTasks_Valid() {
+        int size = manager.getSubTasks().size();
+        manager.createSubTask(new SubTask("n", "d", 0,duration));
+        Assertions.assertEquals(manager.getSubTasks().size(), size + 1);
+    }
+
+    @Test
+    void getSubTasks_ValidIsEmpty() {
+        manager.removeAllSubTask();
+        Assertions.assertEquals(manager.getSubTasks().size(), 0);
+    }
+
+    @Test
+    void getEpics_Valid() {
+        int size = manager.getEpics().size();
+        manager.createEpic(new Epic("n", "d"));
+        Assertions.assertEquals(manager.getEpics().size(), size + 1);
+    }
+
+    @Test
+    void getEpics_ValidIsEmpty() {
+        manager.removeAllEpic();
+        Assertions.assertEquals(manager.getEpics().size(), 0);
+    }
+
+    @Test
+    void getById_NoValidId() {
+        Assertions.assertNull(manager.getById(-1));
+        Assertions.assertNull(manager.getById(23));
+    }
+
+    @Test
+    void getById_ValidId() {
+        Assertions.assertEquals(manager.getById(1), subTask1);
+        Assertions.assertEquals(manager.getById(0), epic);
+        Assertions.assertEquals(manager.getById(4), task);
+    }
+
+    @Test
+    void getById_NoValidIdFromTypeTask() {
+        assertNotEquals(manager.getById(0), subTask1);
+        assertNotEquals(manager.getById(1), epic);
+        assertNotEquals(manager.getById(3), task);
+    }
+}

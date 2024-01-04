@@ -5,12 +5,14 @@ import kanban.model.SubTask;
 import kanban.model.Task;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
-    void createTask(Task task);
+    int createTask(Task task);
 
-    void createSubTask(SubTask subTask);
+    int createSubTask(SubTask subTask);
 
     int createEpic(Epic epic);
 
@@ -36,11 +38,13 @@ public interface TaskManager {
 
     List<Task> getHistory();
 
-    ArrayList<Task> getMapTask();
+    ArrayList<Task> getTasks();
 
-    ArrayList<Epic> getMapEpic();
+    ArrayList<Epic> getEpics();
 
-    ArrayList<SubTask> getMapSubTask();
+    ArrayList<SubTask> getSubTasks();
 
     Task getById(int i);
+
+    LinkedHashMap<Integer,Task> getPrioritizedTasks();
 }

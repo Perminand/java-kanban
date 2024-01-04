@@ -8,8 +8,8 @@ import kanban.model.Task;
 import kanban.utils.CSVTaskFormat;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -18,19 +18,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
+    static Duration duration = Duration.ofMinutes(60);
 
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
         System.out.println("Создаем две задачи:");
-        manager.createTask(new Task("Задача1", "Описание1"));
-        manager.createTask(new Task("Задача2", "Описание2"));
+        manager.createTask(new Task("Задача1", "Описание1", duration));
+        manager.createTask(new Task("Задача2", "Описание2", duration));
         System.out.println("Создаем эпик");
         int idEpic = manager.createEpic(new Epic("Эпик1", "Описание1"));
         int idEpic2 = manager.createEpic(new Epic("Эпик1", "Эпик без подзадач"));
         System.out.println("Создаем три подзадачи:");
-        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic));
-        manager.createSubTask(new SubTask("Подзадача2", "Описание подзадачи2", idEpic));
-        manager.createSubTask(new SubTask("Подзадача3", "Описание подзадачи3", idEpic));
+        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic,duration));
+        manager.createSubTask(new SubTask("Подзадача2", "Описание подзадачи2", idEpic,duration));
+        manager.createSubTask(new SubTask("Подзадача3", "Описание подзадачи3", idEpic,duration));
+
+
 
         System.out.println("Получаем Task");
         System.out.println(manager.getTask(0));
@@ -46,21 +49,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         manager.getSubTask(5).setStatus(Status.DONE);
         manager.getSubTask(6).setStatus(Status.DONE);
         System.out.println("*****************Первый менеджер*****************");
-        System.out.println(manager.getMapTask());
-        System.out.println(manager.getMapSubTask());
-        System.out.println(manager.getMapEpic());
+        System.out.println(manager.getTasks());
+        System.out.println(manager.getSubTasks());
+        System.out.println(manager.getEpics());
         System.out.println();
         System.out.println("История");
         System.out.println(manager.getHistory());
 
         TaskManager newManager = FileBackedTasksManager.loadFromFile(new File("./resources/Tasks.csv"));
         System.out.println("*******************Новый менеджер*********************");
-        System.out.println(newManager.getMapTask());
-        System.out.println(newManager.getMapSubTask());
-        System.out.println(newManager.getMapEpic());
+        System.out.println(newManager.getTasks());
+        System.out.println(newManager.getSubTasks());
+        System.out.println(newManager.getEpics());
         System.out.println();
         System.out.println("История");
         System.out.println(newManager.getHistory());
+        System.out.println(manager.getPrioritizedTasks());
+        
+
 
     }
 
@@ -131,10 +137,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     protected void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
-            final ArrayList<Task> listTask = super.getMapTask();
-            final ArrayList<SubTask> listSubTask = super.getMapSubTask();
-            final ArrayList<Epic> listEpic = super.getMapEpic();
-            fileWriter.write("id,type,name,status,description,epic");
+            final ArrayList<Task> listTask = super.getTasks();
+            final ArrayList<SubTask> listSubTask = super.getSubTasks();
+            final ArrayList<Epic> listEpic = super.getEpics();
+            fileWriter.write("id,type,name,status,description,epic,startDate,duration");
             fileWriter.newLine();
             for (Task task : listTask) {
                 fileWriter.write(CSVTaskFormat.toString(task));
@@ -156,15 +162,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
-        super.createTask(task);
+    public int createTask(Task task) {
+        int key = super.createTask(task);
         save();
+        return key;
     }
 
     @Override
-    public void createSubTask(SubTask subTask) {
-        super.createSubTask(subTask);
+    public int createSubTask(SubTask subTask) {
+        int key = super.createSubTask(subTask);
         save();
+        return key;
+    }
+    @Override
+    public LinkedHashMap<Integer,Task> getPrioritizedTasks(){
+        return super.getPrioritizedTasks();
+
     }
 
     @Override
