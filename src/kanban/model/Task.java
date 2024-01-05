@@ -35,12 +35,13 @@ public class Task {
         this.typeTask = typeTask;
     }
 
-    public Task(String nameTask, String description, Status status, Duration duration) {
+    public Task(String nameTask, String description, Status status, LocalDateTime localDateTime, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
         this.status = status;
         uin = null;
         this.typeTask = TypeTask.TASK;
+        this.startTime = localDateTime;
         this.duration = duration;
         this.endTime = initEndTime();
 

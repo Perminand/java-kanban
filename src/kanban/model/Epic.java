@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class Epic extends Task {
     private ArrayList<Integer> idSubTask;
-    private LocalDateTime endTime;
     private Duration duration;
 
     public Epic(String nameEpic, String description) {
@@ -18,18 +17,14 @@ public class Epic extends Task {
         startTime = null;
     }
 
-    public Epic(String nameEpic, String description, int uin) {
-        super(nameEpic, description, uin, Duration.ofMinutes(60));//Подставленно
-    }
-
     public Epic(int uin, String nameEpic, String description, Status status) {
-        super(uin, nameEpic, description, status, TypeTask.EPIC, LocalDateTime.now(),Duration.ZERO);
+        super(uin, nameEpic, description, status, TypeTask.EPIC, LocalDateTime.now(), Duration.ZERO);
 
     }
 
-    public Epic(int uin, String nameEpic, String description, Status status,LocalDateTime localDateTime,
+    public Epic(int uin, String nameEpic, String description, Status status, LocalDateTime localDateTime,
                 Duration duration) {
-        super(uin, nameEpic, description, status, TypeTask.EPIC, localDateTime,duration);
+        super(uin, nameEpic, description, status, TypeTask.EPIC, localDateTime, duration);
 
     }
 

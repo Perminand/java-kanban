@@ -9,10 +9,12 @@ import java.util.Objects;
 
 public class SubTask extends Task {
     private int epicId;
+
     public SubTask(String nameTask, String description, int epicId, Duration duration) {
         super(nameTask, description, TypeTask.SUBTASK, duration);
         this.epicId = epicId;
     }
+
     public SubTask(String nameTask, String description, int epicId, LocalDateTime localDateTime, Duration duration) {
         super(nameTask, description, TypeTask.SUBTASK, localDateTime, duration);
         this.epicId = epicId;
@@ -25,6 +27,7 @@ public class SubTask extends Task {
         this.setStatus(status);
         this.epicId = epicId;
     }
+
     public SubTask(int uin, String nameTask, String description, Status status, int epicId,
                    Duration duration) {
         super(nameTask, description, TypeTask.SUBTASK, duration);
@@ -32,7 +35,6 @@ public class SubTask extends Task {
         this.setStatus(status);
         this.epicId = epicId;
     }
-
 
 
     public int getEpicId() {

@@ -3,10 +3,12 @@ package kanban.service;
 import kanban.comparator.DateTimeComparator;
 import kanban.enumClass.Status;
 import kanban.model.Epic;
+import kanban.model.FreeTimeManagement;
 import kanban.model.SubTask;
 import kanban.model.Task;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -15,8 +17,11 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     protected final HashMap<Integer, Epic> mapEpic = new HashMap<>();
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
-    protected Map<Integer, Task> sortTaskTime = new LinkedHashMap<>();
+    protected final HashMap<LocalDate, Map<Integer, FreeTimeManagement>> freeTimeManagements = new HashMap<>();
+    protected Set<Task> sortTaskTime;
+
     private int uin = 0;
+
 
     public static void statusCalc(Epic epic, List<SubTask> listSubTask) {
         if (epic == null) return;
@@ -52,25 +57,109 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setEndTime(endMaxTask);
     }
 
-    public LinkedHashMap<Integer, Task> getPrioritizedTasks() {
+    public TreeSet<Task> getPrioritizedTasks() {
         DateTimeComparator comparator = new DateTimeComparator();
         TreeSet<Task> treeListTask = new TreeSet<>(comparator);
         treeListTask.addAll(mapTask.values());
-        LinkedHashMap<Integer, Task> linkedHash = new LinkedHashMap<>();
-        for (Task task : treeListTask) {
-            linkedHash.put(task.getUin(), task);
-        }
-        return linkedHash;
+        treeListTask.addAll(mapSubTask.values());
+        return treeListTask;
     }
+
+
+    private boolean checkAddFreeManagement(Task task) {
+        LocalDateTime startTime;
+        if (task.getStartTime() == null) {
+            return true;
+        }
+        Map<Integer, FreeTimeManagement> hashMap;
+        if (freeTimeManagements.isEmpty()) {
+            startTime = task.getStartTime();
+            while (true) {
+                if (task.getEndTime().isAfter(startTime.toLocalDate().
+                        atTime(23, 59, 59, 999999999))) {
+                    hashMap = new HashMap<>();
+                    hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime, startTime.
+                            toLocalDate().atTime(23, 59, 59, 999999999)));
+                    freeTimeManagements.put(startTime.toLocalDate(), hashMap);
+                    startTime = startTime.plusDays(1).toLocalDate().atTime(0, 0, 0, 0);
+                } else {
+                    hashMap = new HashMap<>();
+                    hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime,
+                            task.getEndTime()));
+                    freeTimeManagements.put(startTime.toLocalDate(), hashMap);
+                    return true;
+                }
+            }
+        } else {
+            boolean isFree = true;
+            Collection<Map<Integer, FreeTimeManagement>> date = freeTimeManagements.values();
+            for (Map<Integer, FreeTimeManagement> map : date)
+                for (FreeTimeManagement freeTime : map.values()) {
+                    if (task.getStartTime().plus(task.getDuration()).isAfter(freeTime.startDuration) &&
+                            task.getStartTime().isBefore(freeTime.endDuration)) {
+                        isFree = false;
+                        break;
+                    }
+
+                    if (task.getStartTime().isAfter(freeTime.endDuration)) {
+                        long coinDays = task.getDuration().toDays();
+                        if (coinDays < 1) break;
+                        for (long i = 1; i < coinDays; i++) {
+                            if (freeTimeManagements.containsKey(task.getStartTime().toLocalDate().plusDays(i))) {
+                                isFree = false;
+                                break;
+                            }
+                        }
+                        Collection<Map<Integer, FreeTimeManagement>> date2 = freeTimeManagements.values();
+                        for (Map<Integer, FreeTimeManagement> map2 : date2)
+                            for (FreeTimeManagement freeTime2 : map2.values()) {
+                                if (task.getStartTime().plus(task.getDuration()).isAfter(freeTime2.startDuration)) {
+                                    isFree = false;
+                                    break;
+                                }
+                            }
+                    }
+                }
+            if (isFree) {
+                startTime = task.getStartTime();
+                while (true) {
+                    if (task.getEndTime().isAfter(startTime.toLocalDate().
+                            atTime(23, 59, 59, 999999999))) {
+                        hashMap = new HashMap<>();
+                        hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime, startTime.
+                                toLocalDate().atTime(23, 59, 59, 999999999)));
+                        freeTimeManagements.put(startTime.toLocalDate(), hashMap);
+                        startTime = startTime.plusDays(1).toLocalDate().atTime(0, 0, 0, 0);
+                    } else {
+                        if (freeTimeManagements.containsKey(startTime.toLocalDate()))
+                            freeTimeManagements.get(startTime.toLocalDate()).put(task.getUin(),
+                                    new FreeTimeManagement(task.getUin(), startTime, task.getEndTime()));
+                        else {
+                            hashMap = new HashMap<>();
+                            hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime, task.getEndTime()));
+                            freeTimeManagements.put(startTime.toLocalDate(), hashMap);
+                        }
+                        return true;
+                    }
+                }
+
+            }
+            return false;
+        }
+    }
+
 
     @Override
     public int createTask(Task task) {
         if (task == null) return -1;
         int key = getUin();
         task.setUin(key);
-        mapTask.put(key, task);
-        sortTaskTime = getPrioritizedTasks();
-        return key;
+        if (checkAddFreeManagement(task)) {
+            mapTask.put(key, task);
+            sortTaskTime = getPrioritizedTasks();
+            return key;
+        }
+        return -1;
     }
 
     @Override
@@ -80,17 +169,21 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setUin(key);
         Epic epic = mapEpic.get(subTask.getEpicId());
         if (epic == null) return -1;
-        mapSubTask.put(key, subTask);
-        epic.getIdSubTask().add(subTask.getUin());
-        List<SubTask> listSubTask = new ArrayList<>();
-        for (Integer i : epic.getIdSubTask()) {
-            for (SubTask st : getSubTasks()) {
-                if (st.getUin().equals(i))
-                    listSubTask.add(st);
+        if (checkAddFreeManagement(subTask)) {
+            mapSubTask.put(key, subTask);
+            epic.getIdSubTask().add(subTask.getUin());
+            List<SubTask> listSubTask = new ArrayList<>();
+            for (Integer i : epic.getIdSubTask()) {
+                for (SubTask st : getSubTasks()) {
+                    if (st.getUin().equals(i))
+                        listSubTask.add(st);
+                }
             }
+            statusCalc(epic, listSubTask);
+            sortTaskTime = getPrioritizedTasks();
+            return key;
         }
-        statusCalc(epic, listSubTask);
-        return key;
+        return -1;
     }
 
     @Override
@@ -99,14 +192,17 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setUin(key);
         epic.setStatus(Status.NEW);
         mapEpic.put(key, epic);
+        sortTaskTime = getPrioritizedTasks();
         return key;
     }
 
     @Override
     public void updateTask(Task task) {
         if (task == null) return;
-        mapTask.put(task.getUin(), task);
-        sortTaskTime = getPrioritizedTasks();
+        if (checkAddFreeManagement(task)) {
+            mapTask.put(task.getUin(), task);
+            sortTaskTime = getPrioritizedTasks();
+        }
     }
 
     @Override
@@ -117,15 +213,17 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) return;
         int key = subTask.getUin();
         subTask.setEpicId(epicId);
-        mapSubTask.put(key, subTask);
-        List<SubTask> listSubTask = new ArrayList<>();
-        for (Integer i : epic.getIdSubTask()) {
-            for (SubTask st : getSubTasks()) {
-                if (st.getUin() == i)
-                    listSubTask.add(st);
+        if (checkAddFreeManagement(subTask)) {
+            mapSubTask.put(key, subTask);
+            List<SubTask> listSubTask = new ArrayList<>();
+            for (Integer i : epic.getIdSubTask()) {
+                for (SubTask st : getSubTasks()) {
+                    if (st.getUin().equals(i))//(st.getUin() == i)
+                        listSubTask.add(st);
+                }
             }
+            statusCalc(epic, listSubTask);
         }
-        statusCalc(epic, listSubTask);
     }
 
     @Override
@@ -166,6 +264,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteById(int id) {
         if (id < 0) return;
         if (mapTask.get(id) != null) {
+            removeFreeTimeManagerTask(Set.of(id));
             mapTask.remove(id);
         }
         if (mapEpic.get(id) != null) {
@@ -175,31 +274,56 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (mapSubTask.get(id) != null) {
             Epic epic = mapEpic.get(mapSubTask.get(id).getEpicId());
+            removeFreeTimeManagerTask(Set.of(id));
             mapSubTask.remove(id);
             epic.getIdSubTask().remove((Integer) id);
             List<SubTask> listSubTask = new ArrayList<>();
             for (Integer i : epic.getIdSubTask()) {
                 for (SubTask st : getSubTasks()) {
-                    if (st.getUin() == i)
+                    if (st.getUin().equals(i))//(st.getUin() == i)
                         listSubTask.add(st);
                 }
             }
             statusCalc(epic, listSubTask);
+
+        }
+    }
+
+    private void removeFreeTimeManagerTask(Set<Integer> set) {
+        List<LocalDate> dateList = new ArrayList<>(freeTimeManagements.keySet());
+        for (LocalDate localDate : dateList) {
+            List<Integer> listIdFreeTime = new ArrayList<>(freeTimeManagements.get(localDate).keySet());
+            for (Integer j : listIdFreeTime)
+                for (Integer k : set) {
+                    if (freeTimeManagements.get(localDate).get(j).idTask == k) {
+                        freeTimeManagements.get(localDate).remove(j);
+                        break;
+                    }
+                }
+            if (freeTimeManagements.get(localDate).isEmpty())
+                freeTimeManagements.remove(localDate);
         }
     }
 
     @Override
     public void removeAllTask() {
+        Set<Integer> intSet = mapTask.keySet();
+        removeFreeTimeManagerTask(intSet);
         mapTask.clear();
+
     }
+
 
     @Override
     public void removeAllSubTask() {
+        Set<Integer> intSet = mapSubTask.keySet();
+        removeFreeTimeManagerTask(intSet);
         mapSubTask.clear();
         for (Epic epic : mapEpic.values()) {
             epic.getIdSubTask().clear();
             epic.setStatus(Status.NEW);
         }
+
     }
 
     @Override

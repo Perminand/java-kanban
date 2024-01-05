@@ -1,6 +1,5 @@
 package kanban.service;
 
-import kanban.enumClass.Status;
 import kanban.exceptions.ManagerSaveException;
 import kanban.model.Epic;
 import kanban.model.SubTask;
@@ -8,8 +7,9 @@ import kanban.model.Task;
 import kanban.utils.CSVTaskFormat;
 
 import java.io.*;
-import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -17,57 +17,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public FileBackedTasksManager(File file) {
         this.file = file;
-    }
-    static Duration duration = Duration.ofMinutes(60);
-
-    public static void main(String[] args) {
-        TaskManager manager = Managers.getDefault();
-        System.out.println("Создаем две задачи:");
-        manager.createTask(new Task("Задача1", "Описание1", duration));
-        manager.createTask(new Task("Задача2", "Описание2", duration));
-        System.out.println("Создаем эпик");
-        int idEpic = manager.createEpic(new Epic("Эпик1", "Описание1"));
-        int idEpic2 = manager.createEpic(new Epic("Эпик1", "Эпик без подзадач"));
-        System.out.println("Создаем три подзадачи:");
-        manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic,duration));
-        manager.createSubTask(new SubTask("Подзадача2", "Описание подзадачи2", idEpic,duration));
-        manager.createSubTask(new SubTask("Подзадача3", "Описание подзадачи3", idEpic,duration));
-
-
-
-        System.out.println("Получаем Task");
-        System.out.println(manager.getTask(0));
-        System.out.println(manager.getEpic(idEpic));
-        System.out.println(manager.getTask(1));
-        System.out.println(manager.getTask(0));
-        System.out.println(manager.getTask(0));
-        System.out.println(manager.getSubTask(3));
-        System.out.println(manager.getSubTask(4));
-        System.out.println(manager.getSubTask(5));
-        System.out.println(manager.getEpic(idEpic2));
-        manager.getSubTask(4).setStatus(Status.DONE);
-        manager.getSubTask(5).setStatus(Status.DONE);
-        manager.getSubTask(6).setStatus(Status.DONE);
-        System.out.println("*****************Первый менеджер*****************");
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getSubTasks());
-        System.out.println(manager.getEpics());
-        System.out.println();
-        System.out.println("История");
-        System.out.println(manager.getHistory());
-
-        TaskManager newManager = FileBackedTasksManager.loadFromFile(new File("./resources/Tasks.csv"));
-        System.out.println("*******************Новый менеджер*********************");
-        System.out.println(newManager.getTasks());
-        System.out.println(newManager.getSubTasks());
-        System.out.println(newManager.getEpics());
-        System.out.println();
-        System.out.println("История");
-        System.out.println(newManager.getHistory());
-        System.out.println(manager.getPrioritizedTasks());
-        
-
-
     }
 
     public static FileBackedTasksManager loadFromFile(File file) {
@@ -82,7 +31,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     i++;
                     continue;
                 }
-                if (line.equals("")) {
+                if (line.isEmpty()) {//Поменял Equals("")
                     isHistory = true;
                     i++;
                     continue;
@@ -103,7 +52,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         tasksManager.getById(id);
                     }
                 }
-
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Файл не найден");
@@ -171,11 +119,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public int createSubTask(SubTask subTask) {
         int key = super.createSubTask(subTask);
-        save();
+        if (!(key < 0)) save();
         return key;
     }
+
     @Override
-    public LinkedHashMap<Integer,Task> getPrioritizedTasks(){
+    public TreeSet<Task> getPrioritizedTasks() {
         return super.getPrioritizedTasks();
 
     }

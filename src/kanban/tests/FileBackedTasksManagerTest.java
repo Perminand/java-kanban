@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.List;
 
- public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
+public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     private File file;
 
@@ -48,12 +48,13 @@ import java.util.List;
         Assertions.assertEquals(0, fileManager2.getSubTasks().size());
 
     }
+
     @Test
     public void HistoryIsEmpty() {
         manager.removeAllTask();
         manager.removeAllEpic();
         FileBackedTasksManager fileManager2 = FileBackedTasksManager.loadFromFile(file);
-        Assertions.assertEquals(0,manager.getHistory().size());
+        Assertions.assertEquals(0, fileManager2.getHistory().size());
     }
 }
 

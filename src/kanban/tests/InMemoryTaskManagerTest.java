@@ -20,6 +20,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
     }
 
+
     @Test
     public void createInMemoryTaskManager() {
         Assertions.assertNotNull(manager.getTasks(), "Возвращает пустой список задач ");
