@@ -1,4 +1,4 @@
-package kanban.tests;
+package tests;
 
 import kanban.model.Task;
 import kanban.service.FileBackedTasksManager;

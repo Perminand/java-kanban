@@ -1,4 +1,4 @@
-package kanban.tests;
+package tests;
 
 import kanban.enumClass.Status;
 import kanban.model.Epic;

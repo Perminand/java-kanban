@@ -1,6 +1,5 @@
-package kanban.tests;
+package tests;
 
-import kanban.comparator.DateTimeComparator;
 import kanban.enumClass.Status;
 import kanban.model.Task;
 import kanban.service.InMemoryTaskManager;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.TreeSet;
 
 public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
@@ -29,8 +29,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void getPrioritizedTasksTest() {
         manager.removeAllTask();
-        DateTimeComparator dateTimeComparator = new DateTimeComparator();
-        TreeSet<Task> treeSet = new TreeSet<>(dateTimeComparator);
+        TreeSet<Task> treeSet = new TreeSet<>(Comparator.comparing(Task::getStartTime));
         Task task1 = new Task(0, "Задача1", "Описание1", Status.NEW,
                 LocalDateTime.of(2024, 1, 2, 0, 0, 0, 0),
                 duration);

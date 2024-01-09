@@ -1,10 +1,9 @@
-package kanban.tests;
+package tests;
 
 import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
-import kanban.service.InMemoryTaskManager;
 import kanban.service.TaskManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -83,7 +82,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createEpicTest() {
+    void createEpicTestStatusDone() {
         assertEquals(epic, manager.getEpic(idEpic), "Epic не совпадает");
         assertEquals(epic.getStatus(), Status.NEW, "Статусы не NEW");
         manager.removeAllSubTask();
@@ -95,7 +94,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3", Status.DONE,
                 idEpic, LocalDateTime.of(2024, 1, 1, 0, 4), duration));
         assertEquals(epic.getStatus(), Status.DONE, "Статусы не DONE");
+    }
 
+    @Test
+    void createEpicTestStatusDoneAndNew() {
         manager.removeAllSubTask();
         manager.createSubTask(new SubTask("Подзадача1", "Описание подзадачи1", idEpic,
                 LocalDateTime.of(2024, 1, 1, 0, 0), duration));
@@ -104,7 +106,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3", Status.DONE,
                 idEpic, LocalDateTime.of(2024, 1, 1, 0, 4), duration));
         assertEquals(epic.getStatus(), Status.IN_PROGRESS, "Статусы не IN_PROGRESS");
+    }
 
+    @Test
+    void createEpicTestStatusIN_PROGRESS() {
         manager.removeAllSubTask();
         manager.createSubTask(new SubTask(1, "Подзадача1", "Описание подзадачи1",
                 Status.IN_PROGRESS, idEpic, LocalDateTime.of(2024, 1, 1, 0, 0), duration));
@@ -113,7 +118,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.createSubTask(new SubTask(3, "Подзадача3", "Описание подзадачи3",
                 Status.IN_PROGRESS, idEpic, LocalDateTime.of(2024, 1, 1, 0, 4), duration));
         assertEquals(epic.getStatus(), Status.IN_PROGRESS, "Статусы не IN_PROGRESS");
+    }
 
+    @Test
+    void createEpicTest() {
         final List<Epic> listTask = manager.getEpics();
         Assertions.assertNotNull(listTask, "Задачи не возвращаются");
         Assertions.assertEquals(1, listTask.size(), "Неверное количество задач");
@@ -121,7 +129,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateTask_ValidId() {
+    void updateTaskValidId() {
         manager.removeAllTask();
         assertEquals(new ArrayList<Task>(), manager.getTasks(), "getTasks не пустой");
         Task task = new Task("name1", "description1", Status.NEW,
@@ -134,7 +142,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateTask_NoValidId() {
+    void updateTaskNoValidId() {
         Task task = new Task("name1", "description1", duration);
         int id = manager.createTask(task);
         Task newTask = new Task(-1, "newName1", "newDescription1", Status.DONE, duration);
@@ -143,7 +151,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTask_ValidId() {
+    void updateSubTaskValidId() {
         manager.removeAllSubTask();
         manager.removeAllTask();
         assertEquals(new ArrayList<SubTask>(), manager.getSubTasks(), "getSubTasks не пустой");
@@ -162,7 +170,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTask_NoValidId() {
+    void updateSubTaskNoValidId() {
         SubTask subTasksValid1 = subTask1;
         SubTask subTasksValid2 = subTask2;
         SubTask subTasksValid3 = subTask3;
@@ -172,14 +180,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateEpic_ValidIEpicFormat() {
+    void updateEpicValidIEpicFormat() {
         Epic newEpic2 = new Epic(idEpic, "name1", "description", Status.IN_PROGRESS);
         manager.updateEpic(newEpic2);
         Assertions.assertEquals(newEpic2.getStatus(), manager.getEpic(idEpic).getStatus());
     }
 
     @Test
-    void updateEpic_No_ValidIEpicFormat() {
+    void updateEpicNoValidIEpicFormat() {
         manager.removeAllEpic();
         assertEquals(new ArrayList<Epic>(), manager.getEpics(), "getEpic не пустой");
         Epic epic = new Epic("name1", "description");
@@ -191,40 +199,40 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getTask_ValidId() {
+    void getTaskValidId() {
         Assertions.assertNotNull(manager.getTask(4));
     }
 
     @Test
-    void getTask_NoValidId() {
+    void getTaskNoValidId() {
         Assertions.assertNull(manager.getTask(0));
         Assertions.assertNull(manager.getTask(-1));
     }
 
 
     @Test
-    void getSubTask_ValidId() {
+    void getSubTaskValidId() {
         Assertions.assertEquals(subTask1, manager.getSubTask(1));
     }
 
     @Test
-    void getSubTask_NoValidId() {
+    void getSubTaskNoValidId() {
         Assertions.assertNull(manager.getSubTask(-1));
     }
 
     @Test
-    void getEpic_ValidId() {
+    void getEpicValidId() {
         Assertions.assertEquals(epic, manager.getEpic(0));
     }
 
     @Test
-    void getEpic_NoValidId() {
+    void getEpicNoValidId() {
         manager.removeAllEpic();
         Assertions.assertNull(manager.getEpic(0));
     }
 
     @Test
-    void deleteById_NoValidIdTask() {
+    void deleteByINoValidIdTask() {
         int size = manager.getTasks().size();
         for (Integer i : List.of(-1, 3, 23))
             manager.deleteById(i);
@@ -232,7 +240,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteById_NoValidIdSubTask() {
+    void deleteByIdNoValidIdSubTask() {
         int size = manager.getSubTasks().size();
         for (Integer i : List.of(-1, 4, 23))
             manager.deleteById(i);
@@ -240,7 +248,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteById_ValidIdEpic() {
+    void deleteByIdValidIdEpic() {
         int size = manager.getTasks().size();
         manager.deleteById(4);
         Assertions.assertEquals(size - 1, manager.getTasks().size(), "Элемент TASK не удалился");
@@ -253,7 +261,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteById_NoValidIdEpic() {
+    void deleteByIdNoValidIdEpic() {
         int size = manager.getEpics().size();
         for (Integer i : List.of(-1, 3, 23))
             manager.deleteById(i);
@@ -272,8 +280,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void removeAllSubTask() {
         //Проверяем изменение статуса после удаление
         for (SubTask subTask : manager.getSubTasks()) subTask.setStatus(Status.DONE);
-        InMemoryTaskManager.statusCalc(epic, manager.getSubTasks());
-        Assertions.assertEquals(Status.DONE, manager.getEpic(0).getStatus());
+        manager.getEpic(0).setStatus(Status.DONE);
         //Проверяем удаления списка SUBTASK
         manager.removeAllSubTask();
         Assertions.assertTrue(manager.getSubTasks().isEmpty());
@@ -293,19 +300,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getHistory_ValidIsEmpty() {
+    void getHistoryValidIsEmpty() {
         //Проверяем на пустую историю
         Assertions.assertEquals(new ArrayList<Task>(), manager.getHistory());
     }
 
     @Test
-    void getHistory_Valid() {
+    void getHistoryValid() {
         manager.getById(0);
         Assertions.assertEquals(manager.getById(0), manager.getHistory().get(0));
     }
 
     @Test
-    void getTasks_Valid() {
+    void getTasksValid() {
         int size = manager.getTasks().size();
         manager.createTask(new Task("n", "d", Status.NEW,
                 LocalDateTime.of(2024, 1, 1, 0, 1), duration));
@@ -313,13 +320,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getTasks_ValidIsEmpty() {
+    void getTasksValidIsEmpty() {
         manager.removeAllTask();
         Assertions.assertEquals(manager.getTasks().size(), 0);
     }
 
     @Test
-    void getSubTasks_Valid() {
+    void getSubTasksValid() {
         int size = manager.getSubTasks().size();
         manager.createSubTask(new SubTask("n", "d", 0,
                 LocalDateTime.of(2024, 1, 1, 0, 1), duration));
@@ -327,39 +334,39 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getSubTasks_ValidIsEmpty() {
+    void getSubTasksValidIsEmpty() {
         manager.removeAllSubTask();
         Assertions.assertEquals(manager.getSubTasks().size(), 0);
     }
 
     @Test
-    void getEpics_Valid() {
+    void getEpicsValid() {
         int size = manager.getEpics().size();
         manager.createEpic(new Epic("n", "d"));
         Assertions.assertEquals(manager.getEpics().size(), size + 1);
     }
 
     @Test
-    void getEpics_ValidIsEmpty() {
+    void getEpicsValidIsEmpty() {
         manager.removeAllEpic();
         Assertions.assertEquals(manager.getEpics().size(), 0);
     }
 
     @Test
-    void getById_NoValidId() {
+    void getByIdNoValidId() {
         Assertions.assertNull(manager.getById(-1));
         Assertions.assertNull(manager.getById(23));
     }
 
     @Test
-    void getById_ValidId() {
+    void getByIdValidId() {
         Assertions.assertEquals(manager.getById(1), subTask1);
         Assertions.assertEquals(manager.getById(0), epic);
         Assertions.assertEquals(manager.getById(4), task);
     }
 
     @Test
-    void getById_NoValidIdFromTypeTask() {
+    void getByIdNoValidIdFromTypeTask() {
         assertNotEquals(manager.getById(0), subTask1);
         assertNotEquals(manager.getById(1), epic);
         assertNotEquals(manager.getById(6), task);

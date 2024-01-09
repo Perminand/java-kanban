@@ -9,7 +9,6 @@ import kanban.utils.CSVTaskFormat;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -121,12 +120,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         int key = super.createSubTask(subTask);
         if (!(key < 0)) save();
         return key;
-    }
-
-    @Override
-    public TreeSet<Task> getPrioritizedTasks() {
-        return super.getPrioritizedTasks();
-
     }
 
     @Override

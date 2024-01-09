@@ -1,6 +1,5 @@
 package kanban.service;
 
-import kanban.comparator.DateTimeComparator;
 import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.FreeTimeManagement;
@@ -17,19 +16,51 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, SubTask> mapSubTask = new HashMap<>();
     protected final HashMap<Integer, Epic> mapEpic = new HashMap<>();
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
+    /*
+    Переменная freeTimeManagements вместе с методами checkAddFreeManagement, removeFreeTimeManagerTask нужны для
+    реализации интерфейса менеджера свободного времени. Данный менеджер "по дням" выводит список задачи и время
+    занятое в этот день до секунды этой задачей по схеме:
+    День|id Task|Время занятое Task
+    09.01.2024,0,9:00 по 11:00;
+    10.01.2024,1,18:00 по 23:59:59;-Начало задачи
+    11.01.2024,1,0:00 по 23:59:59;- занять весь день задачей
+    12.01.2024,1,0:00 по 08:59 - продолжение задачи с предыдущего дня.
+    В одном дне может быть несколько задач, но они не пересекаются.
+    Из этого можно вычислить свободное время в конкретный день времени, одновременно проверить возможность
+    поместить новую задачу в свободный промежуток времени за О(n).  И отсортировать по дням задачи для выполнения в
+    разрезе за О(n). Ну по крайне мере мне так хотелось бы. В дальнейшем хотелось бы реализовать разбиение задачи на
+    несколько временных промежутков для выполнения потому что в реальности во время выполнения одной задачи появляются
+    задачи с более высоким приоритетом которые необходимо выполнить сейчас.
+    */
     protected final HashMap<LocalDate, Map<Integer, FreeTimeManagement>> freeTimeManagements = new HashMap<>();
-    protected Set<Task> sortTaskTime;
+    protected Set<Task> sortTaskTime = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     private int uin = 0;
 
 
-    public static void statusCalc(Epic epic, List<SubTask> listSubTask) {
+    private void statusCalc(Epic epic) {
         if (epic == null) return;
-        if (listSubTask.isEmpty()) {
+        ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
+        if (subTasks.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
         int[] status = {0, 0, 0};//Подсчитываем статусы ["NEW"]["IN_PROGRESS"]["DONE"]
+
+        for (SubTask subTask : subTasks) {
+            if (subTask.getStatus().equals(Status.NEW)) status[0]++;
+            if (subTask.getStatus().equals(Status.IN_PROGRESS)) status[1]++;
+            if (subTask.getStatus().equals(Status.DONE)) status[2]++;
+        }
+        if (status[0] == 0 && status[1] == 0) epic.setStatus(Status.DONE);
+        else if (status[0] < subTasks.size()) epic.setStatus(Status.IN_PROGRESS);
+        else epic.setStatus(Status.NEW);
+
+    }
+
+    private void calculateTimeEpic(Epic epic) {
+        if (epic == null) return;
+        ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
         Duration sumDuration = Duration.ZERO;
         LocalDateTime startMinTask;
         LocalDateTime endMaxTask;
@@ -37,35 +68,28 @@ public class InMemoryTaskManager implements TaskManager {
         else startMinTask = epic.getStartTime();
         if (epic.getEndTime() == null) endMaxTask = LocalDateTime.MIN;
         else endMaxTask = epic.getEndTime();
-        for (SubTask subTask : listSubTask) {
-            if (subTask.getStatus().equals(Status.NEW)) status[0]++;
-            if (subTask.getStatus().equals(Status.IN_PROGRESS)) status[1]++;
-            if (subTask.getStatus().equals(Status.DONE)) status[2]++;
+        for (SubTask subTask : subTasks) {
             sumDuration = sumDuration.plus(subTask.getDuration());
             if (subTask.getStartTime().isBefore(startMinTask))
                 startMinTask = subTask.getStartTime();
             if (subTask.getEndTime().isAfter(endMaxTask))
                 endMaxTask = subTask.getEndTime();
-
-
         }
-        if (status[0] == 0 && status[1] == 0) epic.setStatus(Status.DONE);
-        else if (status[0] < listSubTask.size()) epic.setStatus(Status.IN_PROGRESS);
-        else epic.setStatus(Status.NEW);
         epic.setDuration(sumDuration);
         epic.setStartTime(startMinTask);
         epic.setEndTime(endMaxTask);
     }
 
-    public TreeSet<Task> getPrioritizedTasks() {
-        DateTimeComparator comparator = new DateTimeComparator();
-        TreeSet<Task> treeListTask = new TreeSet<>(comparator);
-        treeListTask.addAll(mapTask.values());
-        treeListTask.addAll(mapSubTask.values());
-        return treeListTask;
+    private void getPrioritizedTasks() {
+        sortTaskTime.clear();
+        sortTaskTime.addAll(mapTask.values());
+        sortTaskTime.addAll(mapSubTask.values());
     }
 
-
+    /*Реализация была задумана как основная вместо sortTaskTime, но так как не было времени реализовать тип
+    переменной freeTimeManagements <treeMap> вместо <HashMap> и опасением, что данная реализация не нужна. А нужно именно
+    sortTaskTime было решено оставить дальнейшее написание для получения комментария по данной реализации.
+         */
     private boolean checkAddFreeManagement(Task task) {
         LocalDateTime startTime;
         if (task.getStartTime() == null) {
@@ -75,14 +99,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (freeTimeManagements.isEmpty()) {
             startTime = task.getStartTime();
             while (true) {
+                //Проверка переноситься ли задача на следующий день
                 if (task.getEndTime().isAfter(startTime.toLocalDate().
                         atTime(23, 59, 59, 999999999))) {
                     hashMap = new HashMap<>();
+                    //Если переноситься заполняем весь день до конца задачей
                     hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime, startTime.
                             toLocalDate().atTime(23, 59, 59, 999999999)));
                     freeTimeManagements.put(startTime.toLocalDate(), hashMap);
+                    //startTime становиться началом следующего дня и так до момента пока весь день не будет занят
                     startTime = startTime.plusDays(1).toLocalDate().atTime(0, 0, 0, 0);
                 } else {
+                    //Остатки задачи при неполном дне заполняются в дне окончании задачи
                     hashMap = new HashMap<>();
                     hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime,
                             task.getEndTime()));
@@ -156,7 +184,7 @@ public class InMemoryTaskManager implements TaskManager {
         task.setUin(key);
         if (checkAddFreeManagement(task)) {
             mapTask.put(key, task);
-            sortTaskTime = getPrioritizedTasks();
+            getPrioritizedTasks();
             return key;
         }
         return -1;
@@ -172,15 +200,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (checkAddFreeManagement(subTask)) {
             mapSubTask.put(key, subTask);
             epic.getIdSubTask().add(subTask.getUin());
-            List<SubTask> listSubTask = new ArrayList<>();
-            for (Integer i : epic.getIdSubTask()) {
-                for (SubTask st : getSubTasks()) {
-                    if (st.getUin().equals(i))
-                        listSubTask.add(st);
-                }
-            }
-            statusCalc(epic, listSubTask);
-            sortTaskTime = getPrioritizedTasks();
+            statusCalc(epic);
+            calculateTimeEpic(epic);
+            getPrioritizedTasks();
             return key;
         }
         return -1;
@@ -192,7 +214,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setUin(key);
         epic.setStatus(Status.NEW);
         mapEpic.put(key, epic);
-        sortTaskTime = getPrioritizedTasks();
+        getPrioritizedTasks();
         return key;
     }
 
@@ -201,7 +223,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) return;
         if (checkAddFreeManagement(task)) {
             mapTask.put(task.getUin(), task);
-            sortTaskTime = getPrioritizedTasks();
+            getPrioritizedTasks();
         }
     }
 
@@ -215,14 +237,8 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setEpicId(epicId);
         if (checkAddFreeManagement(subTask)) {
             mapSubTask.put(key, subTask);
-            List<SubTask> listSubTask = new ArrayList<>();
-            for (Integer i : epic.getIdSubTask()) {
-                for (SubTask st : getSubTasks()) {
-                    if (st.getUin().equals(i))//(st.getUin() == i)
-                        listSubTask.add(st);
-                }
-            }
-            statusCalc(epic, listSubTask);
+            statusCalc(epic);
+            calculateTimeEpic(epic);
         }
     }
 
@@ -277,14 +293,8 @@ public class InMemoryTaskManager implements TaskManager {
             removeFreeTimeManagerTask(Set.of(id));
             mapSubTask.remove(id);
             epic.getIdSubTask().remove((Integer) id);
-            List<SubTask> listSubTask = new ArrayList<>();
-            for (Integer i : epic.getIdSubTask()) {
-                for (SubTask st : getSubTasks()) {
-                    if (st.getUin().equals(i))//(st.getUin() == i)
-                        listSubTask.add(st);
-                }
-            }
-            statusCalc(epic, listSubTask);
+            statusCalc(epic);
+            calculateTimeEpic(epic);
 
         }
     }
@@ -377,6 +387,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         return null;
     }
+
 
     private void removeAllSubTaskByEpic(Epic epic) {
         ArrayList<Integer> listSubTask = epic.getIdSubTask();
