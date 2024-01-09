@@ -103,11 +103,11 @@ public class InMemoryTaskManager implements TaskManager {
                 if (task.getEndTime().isAfter(startTime.toLocalDate().
                         atTime(23, 59, 59, 999999999))) {
                     hashMap = new HashMap<>();
-                    //Если переноситься заполняем весь день до конца задачей
+                    //Если переноситься заполняем весь день до конца этой задачей.
                     hashMap.put(task.getUin(), new FreeTimeManagement(task.getUin(), startTime, startTime.
                             toLocalDate().atTime(23, 59, 59, 999999999)));
                     freeTimeManagements.put(startTime.toLocalDate(), hashMap);
-                    //startTime становиться началом следующего дня и так до момента пока весь день не будет занят
+                    //startTime становиться началом следующего дня и так все дни задачи
                     startTime = startTime.plusDays(1).toLocalDate().atTime(0, 0, 0, 0);
                 } else {
                     //Остатки задачи при неполном дне заполняются в дне окончании задачи
