@@ -1,5 +1,3 @@
-package tests;
-
 import kanban.model.Task;
 import kanban.service.FileBackedTasksManager;
 import org.junit.jupiter.api.AfterEach;

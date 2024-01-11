@@ -1,5 +1,3 @@
-package tests;
-
 import kanban.enumClass.Status;
 import kanban.model.Task;
 import kanban.service.InMemoryTaskManager;
@@ -7,11 +5,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.TreeSet;
 
 public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+    Duration duration = Duration.ofMinutes(1);
 
     @BeforeEach
     public void beforeEach() {

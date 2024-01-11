@@ -1,5 +1,3 @@
-package tests;
-
 import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.SubTask;

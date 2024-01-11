@@ -1,5 +1,3 @@
-package tests;
-
 import kanban.enumClass.Status;
 import kanban.model.Epic;
 import kanban.model.SubTask;
@@ -48,7 +46,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Assertions.assertEquals(task, manager.getTasks().get(0), "Задачи не совпадают");
         Assertions.assertSame(manager.getTasks().get(0).getStatus(), Status.NEW, "Статус не NEW");
         Assertions.assertEquals(manager.getTasks().get(0).getUin(), 4, "UIN не назначается");
-
         final List<Task> listTask = manager.getTasks();
         Assertions.assertNotNull(listTask, "Задачи не возвращаются");
         Assertions.assertEquals(1, listTask.size(), "Неверное количество задач");
@@ -80,6 +77,22 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.removeAllSubTask();
         Assertions.assertNull(manager.getSubTask(1));
     }
+
+    @Test
+    void getPrioritizedTasksTest() {
+        Assertions.assertNotNull(manager.getPrioritizedTasks(), "Список пустой");
+        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
+                manager.getPrioritizedTasks().size());
+        manager.deleteById(0);
+        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
+                manager.getPrioritizedTasks().size());
+        manager.removeAllTask();
+        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
+                manager.getPrioritizedTasks().size());
+        manager.removeAllEpic();
+        Assertions.assertTrue(manager.getPrioritizedTasks().isEmpty());
+    }
+
 
     @Test
     void createEpicTestStatusDone() {
