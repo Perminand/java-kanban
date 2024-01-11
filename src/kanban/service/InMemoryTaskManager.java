@@ -24,14 +24,18 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
+
     @Override
     public int createTask(Task task) {
         if (task == null) return -1;
         int key = getUin();
         task.setUin(key);
-        mapTask.put(key, task);
-        sortTaskTime.add(task);
-        return key;
+        if(isFreeTime(task, sortTaskTime)) {
+            mapTask.put(key, task);
+            sortTaskTime.add(task);
+            return key;
+        }
+        return -1;
     }
 
     @Override
@@ -41,12 +45,15 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setUin(key);
         Epic epic = mapEpic.get(subTask.getEpicId());
         if (epic == null) return -1;
-        mapSubTask.put(key, subTask);
-        epic.getIdSubTask().add(subTask.getUin());
-        statusCalc(epic);
-        calculateTimeEpic(epic);
-        sortTaskTime.add(subTask);
-        return key;
+        if(isFreeTime(subTask,sortTaskTime)) {
+            mapSubTask.put(key, subTask);
+            epic.getIdSubTask().add(subTask.getUin());
+            statusCalc(epic);
+            calculateTimeEpic(epic);
+            sortTaskTime.add(subTask);
+            return key;
+        }
+        return -1;
     }
 
     @Override
@@ -61,8 +68,12 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         if (task == null) return;
-        mapTask.put(task.getUin(), task);
-        sortTaskTime.add(task);
+        Set<Task> doubleSetSort = sortTaskTime;
+        doubleSetSort.removeIf(taskDouble -> task.getUin().equals(taskDouble.getUin()));
+        if(isFreeTime(task,doubleSetSort)) {
+            mapTask.put(task.getUin(), task);
+            sortTaskTime.add(task);
+        }
     }
 
     @Override
@@ -73,10 +84,14 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) return;
         int key = subTask.getUin();
         subTask.setEpicId(epicId);
-        mapSubTask.put(key, subTask);
-        statusCalc(epic);
-        calculateTimeEpic(epic);
-        sortTaskTime.add(subTask);
+        Set<Task> doubleSetSort = sortTaskTime;
+        doubleSetSort.removeIf(taskDouble -> subTask.getUin().equals(taskDouble.getUin()));
+        if(isFreeTime(subTask,doubleSetSort)) {
+            mapSubTask.put(key, subTask);
+            statusCalc(epic);
+            calculateTimeEpic(epic);
+            sortTaskTime.add(subTask);
+        }
     }
 
     @Override
@@ -257,6 +272,16 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.remove(integer);
         }
         epic.setStatus(Status.NEW);
+    }
+    private boolean isFreeTime(Task task, Set<Task> sortTaskTime){
+        for (Task taskSort :sortTaskTime){
+            if(task.getStartTime().isAfter(taskSort.getStartTime())&&
+                    task.getStartTime().isBefore(taskSort.getEndTime())||
+                    task.getEndTime().isAfter(taskSort.getStartTime())&&
+                            task.getEndTime().isBefore(taskSort.getEndTime()))
+                return false;
+        }
+        return true;
     }
 
     private int getUin() {
