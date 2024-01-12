@@ -1,9 +1,12 @@
-package kanban.service;
+package kanban.service.memory;
 
 import kanban.enumClass.Status;
-import kanban.model.Epic;
-import kanban.model.SubTask;
-import kanban.model.Task;
+import kanban.model.tasks.Epic;
+import kanban.model.tasks.SubTask;
+import kanban.model.tasks.Task;
+import kanban.service.memory.history.HistoryManager;
+import kanban.service.manager.Managers;
+import kanban.service.manager.TaskManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,8 +22,8 @@ public class InMemoryTaskManager implements TaskManager {
     private int uin = 0;
 
 
-    public Set<Task> getPrioritizedTasks() {
-        return sortTaskTime;
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(sortTaskTime);
     }
 
 
@@ -275,10 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
     private boolean isFreeTime(Task task, Set<Task> sortTaskTime){
         for (Task taskSort :sortTaskTime){
-            if(task.getStartTime().isAfter(taskSort.getStartTime())&&
-                    task.getStartTime().isBefore(taskSort.getEndTime())||
-                    task.getEndTime().isAfter(taskSort.getStartTime())&&
-                            task.getEndTime().isBefore(taskSort.getEndTime()))
+            if(task.getEndTime().isAfter(taskSort.getStartTime())&&task.getStartTime().isBefore(taskSort.getEndTime()))
                 return false;
         }
         return true;
