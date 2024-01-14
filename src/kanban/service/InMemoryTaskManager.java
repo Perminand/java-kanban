@@ -1,12 +1,9 @@
-package kanban.service.memory;
+package kanban.service;
 
 import kanban.enumClass.Status;
-import kanban.model.tasks.Epic;
-import kanban.model.tasks.SubTask;
-import kanban.model.tasks.Task;
-import kanban.service.memory.history.HistoryManager;
-import kanban.service.manager.Managers;
-import kanban.service.manager.TaskManager;
+import kanban.model.Epic;
+import kanban.model.SubTask;
+import kanban.model.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

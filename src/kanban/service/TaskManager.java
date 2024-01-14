@@ -6,7 +6,6 @@ import kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public interface TaskManager {
     int createTask(Task task);
@@ -45,6 +44,6 @@ public interface TaskManager {
 
     Task getById(int i);
 
-    Set<Task> getPrioritizedTasks();
+    List<Task> getPrioritizedTasks();
 
 }
