@@ -14,11 +14,11 @@ public interface TaskManager {
 
     int createEpic(Epic epic);
 
+    void updateTask(Task task);
+
     void updateSubTask(SubTask subTask);
 
     void updateEpic(Epic epic);
-
-    void updateTask(Task task);
 
     Task getTask(int id);
 
