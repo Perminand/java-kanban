@@ -274,8 +274,11 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setStatus(Status.NEW);
     }
     private boolean isFreeTime(Task task, Set<Task> sortTaskTime){
+
         for (Task taskSort :sortTaskTime){
-            if(task.getEndTime().isAfter(taskSort.getStartTime())&&task.getStartTime().isBefore(taskSort.getEndTime()))
+            if(task.getEndTime().isAfter(taskSort.getStartTime())&&
+                    task.getStartTime().isBefore(taskSort.getEndTime())&&
+                    !task.getUin().equals(taskSort.getUin()))
                 return false;
         }
         return true;
