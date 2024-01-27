@@ -18,8 +18,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 public class TaskHandler implements HttpHandler {
-    Gson gson = new Gson();
+
     TaskManager manager = Managers.getDefault();
+    Gson gson = Managers.getGson();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException, NumberFormatException {
