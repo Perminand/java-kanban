@@ -3,19 +3,17 @@ package kanban.service.server;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import kanban.exceptions.ManagerSaveException;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
-import kanban.service.FileBackedTasksManager;
 import kanban.service.Managers;
 import kanban.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class TaskHandler implements HttpHandler {
 
@@ -26,17 +24,27 @@ public class TaskHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException, NumberFormatException {
         System.out.println(manager.getPrioritizedTasks());
         System.out.println("Получен запрос " + exchange.getRequestMethod());
-        System.out.println(exchange.getRequestURI().getPath().split("/").length);
         String path = exchange.getRequestURI().getPath();
+        String method = exchange.getRequestMethod();
         int count = path.split("/").length;
-        String recurse = path.split("/")[2];
+
         String response = null;
+        System.out.println(path);
+        if (Pattern.matches("^/tasks.*", path)) {
+            switch (method) {
+                case "GET":
+                    sendResponse(exchange, 200, gson.toJson(manager.getPrioritizedTasks()));
+                case "DELETE":
+                    sendResponse(exchange,201,"Все задачи удалены");
+                default:
+                    sendResponse(exchange,400,"Метод не поддерживается");
+            }
+        }
         if (exchange.getRequestMethod().equals("GET") || exchange.getRequestMethod().equals("DELETE")) {
             if (count == 2 && path.split("/")[1].equals("tasks") && exchange.getRequestMethod().equals("GET")) {
-                exchange.sendResponseHeaders(200, 0);
-                response = gson.toJson(manager.getPrioritizedTasks());
+
             } else if (count == 3) {
-                switch (recurse) {
+                switch (path.split("/")[2]) {
                     case "task":
                         switch (exchange.getRequestMethod()) {
                             case "GET":
@@ -121,10 +129,8 @@ public class TaskHandler implements HttpHandler {
                 if (exchange.getRequestHeaders().containsKey("id")) {
                     if (exchange.getRequestHeaders().get("id").size() == 1) {
                         System.out.println("coin=4");
-                        //                       System.out.println(manager.getTask(Integer.parseInt(exchange.getRequestHeaders().get("id").get(0))));
                         response = exchange.getRequestHeaders().get("id").get(0);
                     }
-                    //                  exchange=gson.toJson(manager.getTask(Integer.parseInt(exchange.getRequestHeaders().get("id").get(0))));
                 }
             }
         } else if (exchange.getRequestMethod().equals("POST")) {
@@ -137,7 +143,7 @@ public class TaskHandler implements HttpHandler {
                 InputStream inputStream = exchange.getRequestBody();
                 String body = new String(inputStream.readAllBytes());
                 Task task = gson.fromJson(body, Task.class);
-                switch (recurse) {
+                switch (path.split("/")[2]) {
                     case "task":
                         manager.createTask(task);
                         exchange.sendResponseHeaders(201, 0);
@@ -169,7 +175,7 @@ public class TaskHandler implements HttpHandler {
                         InputStream inputStream = exchange.getRequestBody();
                         String body = new String(inputStream.readAllBytes());
                         Task task = gson.fromJson(body, Task.class);
-                        switch (recurse) {
+                        switch (path.split("/")[2]) {
                             case "task":
                                 manager.updateTask(task);
                                 exchange.sendResponseHeaders(201, 0);
@@ -194,10 +200,14 @@ public class TaskHandler implements HttpHandler {
                 }
             }
         }
+
+    }
+
+
+    private void sendResponse(HttpExchange exchange, int code, String response) throws IOException {
+        exchange.sendResponseHeaders(code, 0);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes(StandardCharsets.UTF_8));
         }
-
-
     }
 }
