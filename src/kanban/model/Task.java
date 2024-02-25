@@ -7,21 +7,23 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Task {
-    private final String nameTask;
-    private final String description;
-    private final TypeTask typeTask;
+    protected Integer id;
+    protected final String nameTask;
+    protected Status status;
+    protected final String description;
+    protected final TypeTask typeTask;
     protected LocalDateTime startTime = LocalDateTime.now();
-    private Duration duration;
-    private LocalDateTime endTime;
-    private Integer uin;
-    private Status status;
+    protected Duration duration;
+    protected LocalDateTime endTime;
+
+
 
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
         this.duration = duration;
         this.status = Status.NEW;
-        uin = null;
+        id = null;
         this.typeTask = TypeTask.TASK;
         this.endTime = initEndTime();
     }
@@ -30,7 +32,7 @@ public class Task {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
-        uin = null;
+        id = null;
         startTime = null;
         this.typeTask = typeTask;
     }
@@ -39,7 +41,7 @@ public class Task {
         this.nameTask = nameTask;
         this.description = description;
         this.status = status;
-        uin = null;
+        id = null;
         this.typeTask = TypeTask.TASK;
         this.startTime = localDateTime;
         this.duration = duration;
@@ -51,7 +53,7 @@ public class Task {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
-        uin = null;
+        id = null;
         this.typeTask = typeTask;
         this.duration = duration;
         this.endTime = initEndTime();
@@ -64,7 +66,7 @@ public class Task {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
-        uin = null;
+        id = null;
         this.typeTask = typeTask;
         this.duration = duration;
         this.startTime = localDateTime;
@@ -73,21 +75,21 @@ public class Task {
 
     }
 
-    protected Task(String nameTask, String description, int uin, Duration duration) {
+    protected Task(String nameTask, String description, int id, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
-        this.uin = uin;
+        this.id = id;
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
         this.endTime = initEndTime();
 
     }
 
-    public Task(int uin, String nameTask, String description, Status status, TypeTask typeTask,
+    public Task(int id, String nameTask, String description, Status status, TypeTask typeTask,
                 LocalDateTime startTime, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
-        this.uin = uin;
+        this.id = id;
         this.status = status;
         this.typeTask = typeTask;
         this.startTime = startTime;
@@ -97,9 +99,9 @@ public class Task {
 
     }
 
-    public Task(int uin, String newName, String newDescription, Status status, LocalDateTime localDateTime,
+    public Task(int id, String newName, String newDescription, Status status, LocalDateTime localDateTime,
                 Duration duration) {
-        this.uin = uin;
+        this.id = id;
         this.nameTask = newName;
         this.description = newDescription;
         this.status = status;
@@ -111,8 +113,8 @@ public class Task {
 
     }
 
-    public Task(int uin, String newName, String newDescription, Status status, Duration duration) {
-        this.uin = uin;
+    public Task(int id, String newName, String newDescription, Status status, Duration duration) {
+        this.id = id;
         this.nameTask = newName;
         this.description = newDescription;
         this.status = status;
@@ -136,11 +138,11 @@ public class Task {
     }
 
     public Integer getUin() {
-        return uin;
+        return id;
     }
 
-    public void setUin(int uin) {
-        this.uin = uin;
+    public void setUin(int id) {
+        this.id = id;
     }
 
     public Status getStatus() {
@@ -185,7 +187,7 @@ public class Task {
                 ", startTime=" + startTime +
                 ", duration=" + duration +
                 ", endTime=" + endTime +
-                ", uin=" + uin +
+                ", id=" + id +
                 ", status=" + status +
                 '}';
     }
