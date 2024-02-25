@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class SubTask extends Task {
-    private int epicId;
+    protected int epicId;
 
     public SubTask(String nameTask, String description, int epicId, Duration duration) {
         super(nameTask, description, TypeTask.SUBTASK, duration);
