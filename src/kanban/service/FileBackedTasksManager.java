@@ -59,54 +59,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return tasksManager;
     }
 
-    private void addTask(Task task) {
-        switch (task.getTypeTask()) {
-            case TASK:
-                mapTask.put(task.getUin(), task);
-                break;
-            case SUBTASK:
-                SubTask subTask = (SubTask) task;
-                int idEpic = subTask.getEpicId();
-                Epic epic = mapEpic.get(idEpic);
-                ArrayList<Integer> listIdSubTask = epic.getIdSubTask();
-                if (listIdSubTask == null)
-                    listIdSubTask = new ArrayList<>();
-                listIdSubTask.add(subTask.getUin());
-                mapEpic.get(idEpic).setIdSubTask(listIdSubTask);
-                mapSubTask.put(subTask.getUin(), subTask);
-                break;
-            case EPIC:
-                mapEpic.put(task.getUin(), (Epic) task);
-                break;
-        }
-
-    }
-
-    protected void save() {
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
-            final ArrayList<Task> listTask = super.getTasks();
-            final ArrayList<SubTask> listSubTask = super.getSubTasks();
-            final ArrayList<Epic> listEpic = super.getEpics();
-            fileWriter.write("id,type,name,status,description,epic,startDate,duration");
-            fileWriter.newLine();
-            for (Task task : listTask) {
-                fileWriter.write(CSVTaskFormat.toString(task));
-                fileWriter.newLine();
-            }
-            for (Epic task : listEpic) {
-                fileWriter.write(CSVTaskFormat.toString(task));
-                fileWriter.newLine();
-            }
-            for (SubTask task : listSubTask) {
-                fileWriter.write(CSVTaskFormat.toString(task));
-                fileWriter.newLine();
-            }
-            fileWriter.newLine();
-            fileWriter.write(CSVTaskFormat.historyToString(super.historyManager));
-        } catch (IOException e) {
-            throw new ManagerSaveException("Файл не найден");
-        }
-    }
 
     @Override
     public int createTask(Task task) {
@@ -191,6 +143,51 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         ArrayList<SubTask> listSubTask = super.getSubTaskByIdEpic(epic);
         save();
         return listSubTask;
+    }
+    protected void save() {
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
+            fileWriter.write("id,type,name,status,description,epic,startDate,duration");
+            fileWriter.newLine();
+            for (Task task : super.getTasks()) {
+                fileWriter.write(CSVTaskFormat.toString(task));
+                fileWriter.newLine();
+            }
+            for (Epic task : super.getEpics()) {
+                fileWriter.write(CSVTaskFormat.toString(task));
+                fileWriter.newLine();
+            }
+            for (SubTask task : super.getSubTasks()) {
+                fileWriter.write(CSVTaskFormat.toString(task));
+                fileWriter.newLine();
+            }
+            fileWriter.newLine();
+            fileWriter.write(CSVTaskFormat.historyToString(super.historyManager));
+        } catch (IOException e) {
+            throw new ManagerSaveException("Файл не найден");
+        }
+    }
+
+    private void addTask(Task task) {
+        switch (task.getTypeTask()) {
+            case TASK:
+                mapTask.put(task.getUin(), task);
+                break;
+            case SUBTASK:
+                SubTask subTask = (SubTask) task;
+                int idEpic = subTask.getEpicId();
+                Epic epic = mapEpic.get(idEpic);
+                ArrayList<Integer> listIdSubTask = epic.getIdSubTask();
+                if (listIdSubTask == null)
+                    listIdSubTask = new ArrayList<>();
+                listIdSubTask.add(subTask.getUin());
+                mapEpic.get(idEpic).setIdSubTask(listIdSubTask);
+                mapSubTask.put(subTask.getUin(), subTask);
+                break;
+            case EPIC:
+                mapEpic.put(task.getUin(), (Epic) task);
+                break;
+        }
+
     }
 
 }
