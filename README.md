@@ -1,2 +1,2 @@
 # java-kanban
-Repository for homework project.
+Проект собирается с использованием java 21
