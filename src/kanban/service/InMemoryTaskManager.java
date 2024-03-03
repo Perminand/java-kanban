@@ -1,6 +1,7 @@
 package kanban.service;
 
 import kanban.enumClass.Status;
+import kanban.enumClass.TypeTask;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
@@ -105,27 +106,23 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTask(int id) {
-        Task task = mapTask.get(id);
-        if (task != null)
-            historyManager.add(task);
-        return task;
+        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.TASK);
+        return optionalTask.orElse(null);
     }
 
     @Override
-    public SubTask getSubTask(int id) throws NullPointerException {
-        SubTask task = mapSubTask.get(id);
-        if (task != null)
-            historyManager.add(task);
-        return task;
+    public SubTask getSubTask(int id) {
+        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.SUBTASK);
+        return (SubTask) optionalTask.orElse(null);
     }
 
     @Override
     public Epic getEpic(int id) {
-        Epic task = mapEpic.get(id);
-        if (task != null)
-            historyManager.add(task);
-        return task;
+        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.EPIC);
+        return (Epic) optionalTask.orElse(null);
     }
+
+
 
     @Override
     public void deleteById(int id) {
@@ -166,7 +163,6 @@ public class InMemoryTaskManager implements TaskManager {
             epic.getIdSubTask().clear();
             epic.setStatus(Status.NEW);
         }
-
     }
 
     @Override
@@ -282,6 +278,25 @@ public class InMemoryTaskManager implements TaskManager {
                 return false;
         }
         return true;
+    }
+
+    private Optional<Task> getOptionalTasks(int id, TypeTask typeTask){
+        Optional<Task> optionalTask;
+        switch (typeTask){
+            case TASK:
+                optionalTask = Optional.ofNullable(mapTask.get(id));
+                break;
+            case SUBTASK:
+                optionalTask = Optional.ofNullable(mapSubTask.get(id));
+                break;
+            case EPIC:
+                optionalTask = Optional.ofNullable(mapEpic.get(id));
+                break;
+            default:
+                optionalTask = Optional.empty();
+        }
+        optionalTask.ifPresent(historyManager::add);
+        return optionalTask;
     }
 
     private int getUin() {
