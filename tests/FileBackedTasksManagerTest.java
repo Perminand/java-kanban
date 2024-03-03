@@ -42,7 +42,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     public void EpicNoTask() {
         manager.removeAllSubTask();
         FileBackedTasksManager fileManager2 = FileBackedTasksManager.loadFromFile(file);
-        Assertions.assertNull(fileManager2.getEpic(0).getIdSubTask(), "idSubTask не Null");
+        Assertions.assertEquals(fileManager2.getEpic(0).getIdSubTask().size(),0, "idSubTask не []");
         Assertions.assertEquals(0, fileManager2.getSubTasks().size());
 
     }
