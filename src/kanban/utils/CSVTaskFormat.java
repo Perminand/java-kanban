@@ -55,24 +55,30 @@ public class CSVTaskFormat {
         final Status status = Status.valueOf(values[4]);
         LocalDateTime localDate;
 
-        if (type == TypeTask.TASK) {
-            localDate = LocalDateTime.parse(values[5]);
-            final Duration duration = Duration.parse(values[6]);
-            return new Task(id, name, descriptions, status, type, localDate, duration);
-        } else if (type == TypeTask.SUBTASK) {
-            final int epicId = Integer.parseInt(values[5]);
-            localDate = LocalDateTime.parse(values[6]);
-            Duration duration = Duration.parse(values[7]);
-            return new SubTask(id, name, descriptions, status, epicId, localDate, duration);
-        } else if (type == TypeTask.EPIC) {
-            if (values[5].equals("null")) localDate = null;
-            else localDate = LocalDateTime.parse(values[5]);
+        switch (type) {
+            case TASK: {
+                localDate = LocalDateTime.parse(values[5]);
+                final Duration duration = Duration.parse(values[6]);
+                return new Task(id, name, descriptions, status, type, localDate, duration);
+            }
+            case SUBTASK: {
+                final int epicId = Integer.parseInt(values[5]);
+                localDate = LocalDateTime.parse(values[6]);
+                Duration duration = Duration.parse(values[7]);
+                return new SubTask(id, name, descriptions, status, epicId, localDate, duration);
+            }
+            case EPIC: {
+                if (values[5].equals("null")) localDate = null;
+                else localDate = LocalDateTime.parse(values[5]);
 
-            final Duration duration;
-            if (values[6].equals("null")) duration = null;
-            else duration = Duration.parse(values[6]);
-            return new Epic(id, name, descriptions, status, localDate, duration);
-        } else return null;
+                final Duration duration;
+                if (values[6].equals("null")) duration = null;
+                else duration = Duration.parse(values[6]);
+                return new Epic(id, name, descriptions, status, localDate, duration);
+            }
+            default:
+                return null;
+        }
     }
 
 }
