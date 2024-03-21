@@ -3,6 +3,7 @@ package kanban.service.server.handlers;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import kanban.enumClass.TypeTask;
 import kanban.exceptions.IntersectionOfTime;
 import kanban.exceptions.NoTaskException;
 import kanban.model.Task;
@@ -11,6 +12,7 @@ import kanban.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.stream.Collectors;
 
 public class TaskHandler implements HttpHandler {
 
@@ -20,7 +22,7 @@ public class TaskHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException, NumberFormatException {
-        System.out.println("Пришел запрос на TASK");
+        System.out.println("Пришел запрос "+exchange.getRequestMethod()+" на TASK");
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
         path = path.split("/api/v1")[1];
@@ -29,8 +31,10 @@ public class TaskHandler implements HttpHandler {
             case "GET":
                 switch (count) {
                     case 2:
-                        System.out.println(manager.getPrioritizedTasks());
-                        String s = gson.toJson(manager.getPrioritizedTasks());
+                        String s = gson.toJson(manager.getPrioritizedTasks()
+                                .stream()
+                                .filter(task -> task.getTypeTask()== TypeTask.TASK)
+                                .collect(Collectors.toList()));
                         sendResponse.send(exchange, 200, s);
                         break;
                     case 3:
