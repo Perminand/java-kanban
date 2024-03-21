@@ -108,6 +108,8 @@ public class Task {
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
         this.startTime = localDateTime;
+        this.endTime = initEndTime();
+
 
     }
 
