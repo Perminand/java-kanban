@@ -30,7 +30,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     i++;
                     continue;
                 }
-                if (line.isEmpty()) {//Поменял Equals("")
+                if (line.isEmpty()) {
                     isHistory = true;
                     i++;
                     continue;
