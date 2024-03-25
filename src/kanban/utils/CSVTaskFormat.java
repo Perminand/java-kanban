@@ -57,14 +57,28 @@ public class CSVTaskFormat {
 
         switch (type) {
             case TASK: {
-                localDate = LocalDateTime.parse(values[5]);
-                final Duration duration = Duration.parse(values[6]);
+                if (values[5].equals("null")) {
+                    localDate = null;
+                } else {
+                    localDate = LocalDateTime.parse(values[5]);
+                }
+                Duration duration;
+                if (values[6].equals("null"))
+                    duration = null;
+                else
+                    duration = Duration.parse(values[6]);
                 return new Task(id, name, descriptions, status, type, localDate, duration);
             }
             case SUBTASK: {
                 final int epicId = Integer.parseInt(values[5]);
-                localDate = LocalDateTime.parse(values[6]);
-                Duration duration = Duration.parse(values[7]);
+                if (values[6].equals("null")) {
+                    localDate = null;
+                } else {
+                    localDate = LocalDateTime.parse(values[6]);
+                }
+                Duration duration;
+                if(values[7].equals("null")) duration =null;
+                else duration = Duration.parse(values[7]);
                 return new SubTask(id, name, descriptions, status, epicId, localDate, duration);
             }
             case EPIC: {

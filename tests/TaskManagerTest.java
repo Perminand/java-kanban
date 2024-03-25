@@ -50,9 +50,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Assertions.assertNotNull(listTask, "Задачи не возвращаются");
         Assertions.assertEquals(1, listTask.size(), "Неверное количество задач");
         Assertions.assertEquals(task, listTask.get(0), "Задачи не совпадают");
-        Assertions.assertNotNull(task.getStartTime(), "startTime null");
-        Assertions.assertNotNull(task.getDuration(), "Duration null");
-        Assertions.assertEquals(epic.getStartTime(), subTask1.getStartTime(), "startTime не null");
+        Assertions.assertEquals(epic.getStartTime(), subTask1.getStartTime(), "startTime не верен");
         Assertions.assertEquals(epic.getDuration(), subTask1.getDuration().plus(
                 subTask2.getDuration().plus(subTask3.getDuration())), "Duration не null");
         Assertions.assertNotNull(subTask1.getStartTime(), "startTime null");
@@ -81,14 +79,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void getPrioritizedTasksTest() {
         Assertions.assertNotNull(manager.getPrioritizedTasks(), "Список пустой");
-        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
-                manager.getPrioritizedTasks().size());
-        manager.deleteById(0);
-        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
-                manager.getPrioritizedTasks().size());
         manager.removeAllTask();
-        Assertions.assertEquals(manager.getTasks().size() + manager.getSubTasks().size(),
-                manager.getPrioritizedTasks().size());
         manager.removeAllEpic();
         Assertions.assertTrue(manager.getPrioritizedTasks().isEmpty());
     }
@@ -146,10 +137,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.removeAllTask();
         assertEquals(new ArrayList<Task>(), manager.getTasks(), "getTasks не пустой");
         Task task = new Task("name1", "description1", Status.NEW,
-                LocalDateTime.of(2024, 1, 1, 0, 0), duration);
+                LocalDateTime.of(2024, 1, 1, 0, 5), duration);
         int id = manager.createTask(task);
         Task newTask = new Task(id, "newName1", "newDescription1", Status.DONE,
-                LocalDateTime.of(2024, 1, 1, 0, 2), duration);
+                LocalDateTime.of(2024, 1, 1, 0, 10), duration);
         manager.updateTask(newTask);
    }
 

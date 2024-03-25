@@ -2,6 +2,9 @@ package kanban.service;
 
 import kanban.enumClass.Status;
 import kanban.enumClass.TypeTask;
+import kanban.exceptions.IntersectionOfTime;
+import kanban.exceptions.NoEpicExceptionForSubTask;
+import kanban.exceptions.NoTaskException;
 import kanban.model.Epic;
 import kanban.model.SubTask;
 import kanban.model.Task;
@@ -25,18 +28,28 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
+    public static boolean isFreeTime(Task task, Set<Task> sortTaskTime) {
+        for (Task taskSort : sortTaskTime) {
+            if (task.getEndTime().isAfter(taskSort.getStartTime()) && task.getStartTime().isBefore(taskSort.getEndTime()) && !task.getUin().equals(taskSort.getUin()))
+                return false;
+        }
+        return true;
+    }
 
     @Override
-    public int createTask(Task task) {
-        if (task == null) return -1;
+    public int createTask(Task task) throws IntersectionOfTime, NullPointerException {
+        if (task == null) throw new NullPointerException("Передан Null");
+        if (task.getStatus() == null) task.setStatus(Status.NEW);
         int key = getUin();
         task.setUin(key);
-        if(isFreeTime(task, sortTaskTime)) {
-            mapTask.put(key, task);
-            sortTaskTime.add(task);
-            return key;
+        if (task.getTypeTask() == null) task.setTypeTask(TypeTask.TASK);
+        if (task.getStartTime() != null) {
+            if (isFreeTime(task, sortTaskTime)) {
+                sortTaskTime.add(task);
+            } else throw new IntersectionOfTime("Задача пересекается с существующей");
         }
-        return -1;
+        mapTask.put(key, task);
+            return key;
     }
 
     @Override
@@ -44,17 +57,25 @@ public class InMemoryTaskManager implements TaskManager {
         if (subTask == null) return -1;
         int key = getUin();
         subTask.setUin(key);
+        if (subTask.getTypeTask() == null) subTask.setTypeTask(TypeTask.SUBTASK);
+        if (subTask.getStatus() == null) subTask.setStatus(Status.NEW);
         Epic epic = mapEpic.get(subTask.getEpicId());
-        if (epic == null) return -1;
-        if(isFreeTime(subTask,sortTaskTime)) {
+        if (epic == null) throw new NoEpicExceptionForSubTask("Epic с id: " + subTask.getEpicId() + " не найден.");
+        if (subTask.getStartTime() != null) {
+            if (isFreeTime(subTask, sortTaskTime)) {
+                sortTaskTime.add(subTask);
+            } else throw new IntersectionOfTime("Задача пересекается с существующей");
             mapSubTask.put(key, subTask);
-            epic.getIdSubTask().add(subTask.getUin());
-            statusCalc(epic);
+            epic.getIdSubTask().add(key);
             calculateTimeEpic(epic);
-            sortTaskTime.add(subTask);
+            statusCalc(epic);
+            return key;
+        } else {
+            mapSubTask.put(key, subTask);
+            epic.getIdSubTask().add(key);
+            statusCalc(epic);
             return key;
         }
-        return -1;
     }
 
     @Override
@@ -62,6 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
         int key = getUin();
         epic.setUin(key);
         epic.setStatus(Status.NEW);
+        if (epic.getTypeTask() == null) epic.setTypeTask(TypeTask.EPIC);
         mapEpic.put(key, epic);
         return key;
     }
@@ -71,12 +93,14 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) return;
         Set<Task> doubleSetSort = sortTaskTime;
         doubleSetSort.removeIf(taskDouble -> task.getUin().equals(taskDouble.getUin()));
-        if(isFreeTime(task,doubleSetSort)) {
-            mapTask.put(task.getUin(), task);
-            sortTaskTime.add(task);
+        if (task.getStartTime() != null) {
+            if (isFreeTime(task, doubleSetSort)) {
+                sortTaskTime.add(task);
+            } else throw new IntersectionOfTime("Задача пересекается с существующей");
         }
-    }
+        mapTask.put(task.getUin(), task);
 
+    }
     @Override
     public void updateSubTask(SubTask subTask) {
         if (subTask == null) return;
@@ -87,12 +111,14 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setEpicId(epicId);
         Set<Task> doubleSetSort = sortTaskTime;
         doubleSetSort.removeIf(taskDouble -> subTask.getUin().equals(taskDouble.getUin()));
-        if(isFreeTime(subTask,doubleSetSort)) {
-            mapSubTask.put(key, subTask);
-            statusCalc(epic);
-            calculateTimeEpic(epic);
-            sortTaskTime.add(subTask);
+        if (subTask.getStartTime() != null) {
+            if (isFreeTime(subTask, doubleSetSort)) {
+                calculateTimeEpic(epic);
+                sortTaskTime.add(subTask);
+            } else throw new IntersectionOfTime("Задача пересекается с существующей");
         }
+        mapSubTask.put(key, subTask);
+        statusCalc(epic);
     }
 
     @Override
@@ -125,23 +151,23 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(int id) throws NoTaskException {
         if (id < 0) return;
         if (mapTask.get(id) != null) {
-            sortTaskTime.remove(mapTask.remove(id));
-        }
-        if (mapEpic.get(id) != null) {
+            try {
+                sortTaskTime.remove(mapTask.remove(id));
+            } catch (NullPointerException ignored) {
+            }
+        } else if (mapEpic.get(id) != null) {
             Epic epic = mapEpic.get(id);
             removeAllSubTaskByEpic(epic);
             mapEpic.remove(id);
-        }
-        if (mapSubTask.get(id) != null) {
+        } else if (mapSubTask.get(id) != null) {
             Epic epic = mapEpic.get(mapSubTask.get(id).getEpicId());
             sortTaskTime.remove(mapSubTask.remove(id));
             epic.getIdSubTask().remove((Integer) id);
             statusCalc(epic);
             calculateTimeEpic(epic);
-
         }
     }
 
@@ -150,7 +176,6 @@ public class InMemoryTaskManager implements TaskManager {
         mapTask.clear();
         sortTaskTime.clear();
         sortTaskTime.addAll(mapSubTask.values());
-
     }
 
 
@@ -158,7 +183,11 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubTask() {
         mapSubTask.clear();
         sortTaskTime.clear();
-        sortTaskTime.addAll(mapTask.values());
+        for (Task task : mapTask.values()) {
+            if (task.getStartTime() != null) {
+                sortTaskTime.add(task);
+            }
+        }
         for (Epic epic : mapEpic.values()) {
             epic.getIdSubTask().clear();
             epic.setStatus(Status.NEW);
@@ -169,8 +198,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllEpic() {
         mapSubTask.clear();
         mapEpic.clear();
+        for (Task task : getPrioritizedTasks()) {
+            if (task.getTypeTask() != TypeTask.TASK)
+                sortTaskTime.remove(task);
+        }
     }
 
+    @Override
     public ArrayList<SubTask> getSubTaskByIdEpic(Epic epic) {
         ArrayList<SubTask> arr = new ArrayList<>();
         for (Integer i : epic.getIdSubTask()) {
@@ -241,19 +275,25 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) return;
         ArrayList<SubTask> subTasks = getSubTaskByIdEpic(epic);
         Duration sumDuration = Duration.ZERO;
-        LocalDateTime startMinTask;
-        LocalDateTime endMaxTask;
-        if (epic.getStartTime() == null) startMinTask = LocalDateTime.MAX;
-        else startMinTask = epic.getStartTime();
-        if (epic.getEndTime() == null) endMaxTask = LocalDateTime.MIN;
-        else endMaxTask = epic.getEndTime();
+        LocalDateTime startMinTask = epic.getStartTime();
+        LocalDateTime endMaxTask = epic.getEndTime();
+
         for (SubTask subTask : subTasks) {
             sumDuration = sumDuration.plus(subTask.getDuration());
-            if (subTask.getStartTime().isBefore(startMinTask))
+            if (startMinTask != null) {
+                if (subTask.getStartTime().isBefore(startMinTask))
+                    startMinTask = subTask.getStartTime();
+            } else {
                 startMinTask = subTask.getStartTime();
-            if (subTask.getEndTime().isAfter(endMaxTask))
+            }
+            if (endMaxTask != null) {
+                if (subTask.getEndTime().isBefore(endMaxTask))
+                    endMaxTask = subTask.getEndTime();
+            } else {
                 endMaxTask = subTask.getEndTime();
+            }
         }
+
         epic.setDuration(sumDuration);
         epic.setStartTime(startMinTask);
         epic.setEndTime(endMaxTask);
@@ -269,16 +309,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         epic.setStatus(Status.NEW);
     }
-    private boolean isFreeTime(Task task, Set<Task> sortTaskTime){
 
-        for (Task taskSort :sortTaskTime){
-            if(task.getEndTime().isAfter(taskSort.getStartTime())&&
-                    task.getStartTime().isBefore(taskSort.getEndTime())&&
-                    !task.getUin().equals(taskSort.getUin()))
-                return false;
-        }
-        return true;
-    }
 
     private Optional<Task> getOptionalTasks(int id, TypeTask typeTask){
         Optional<Task> optionalTask;
