@@ -77,7 +77,7 @@ public class CSVTaskFormat {
                     localDate = LocalDateTime.parse(values[6]);
                 }
                 Duration duration;
-                if(values[7].equals("null")) duration =null;
+                if (values[7].equals("null")) duration = null;
                 else duration = Duration.parse(values[7]);
                 return new SubTask(id, name, descriptions, status, epicId, localDate, duration);
             }

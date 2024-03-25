@@ -11,20 +11,20 @@ import kanban.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 public class TaskHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
+    SendResponse sendResponse = new SendResponse();
 
     public TaskHandler(TaskManager taskManager) {
         this.manager = taskManager;
         this.gson = Managers.getGson();
     }
 
-    SendResponse sendResponse = new SendResponse();
-
     @Override
     public void handle(HttpExchange exchange) throws IOException, NumberFormatException {
-        System.out.println("Пришел запрос "+exchange.getRequestMethod()+" на TASK");
+        System.out.println("Пришел запрос " + exchange.getRequestMethod() + " на TASK");
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
         path = path.split("/api/v1")[1];
@@ -63,7 +63,7 @@ public class TaskHandler implements HttpHandler {
                     case 2:
                         try {
                             int id = manager.createTask(task);
-                            sendResponse.send(exchange, 201, gson.toJson("id:"+id));
+                            sendResponse.send(exchange, 201, gson.toJson("id:" + id));
                         } catch (IntersectionOfTime | NullPointerException e) {
                             sendResponse.send(exchange, 406, e.getMessage());
                         }

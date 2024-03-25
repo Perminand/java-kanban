@@ -121,7 +121,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void deleteById(int id){
+    public void deleteById(int id) {
         super.deleteById(id);
         save();
     }
@@ -150,6 +150,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
         return listSubTask;
     }
+
     protected void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
             fileWriter.write("id,type,name,status,description,epic,startDate,duration");

@@ -43,9 +43,11 @@ public class Epic extends Task {
 
         this.idSubTask = idSubTask;
     }
-       public void setEndTime(LocalDateTime endTime) {
+
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
+
     @Override
     public String toString() {
         return "Epic{" + "idSubTask=" + idSubTask + " {" + super.toString() + "}";

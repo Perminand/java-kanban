@@ -14,6 +14,7 @@ public class SubTask extends Task {
         super(nameTask, description, TypeTask.SUBTASK, duration);
         this.epicId = epicId;
     }
+
     public SubTask(String nameTask, String description, int epicId) {
         super(nameTask, description, TypeTask.SUBTASK);
         this.epicId = epicId;
@@ -72,6 +73,6 @@ public class SubTask extends Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getEpicId())*31;
+        return Objects.hash(getEpicId()) * 31;
     }
 }

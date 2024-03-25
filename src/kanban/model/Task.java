@@ -7,21 +7,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Task {
-    protected Integer id;
     protected final String nameTask;
-    protected Status status;
     protected final String description;
-
-    public void setTypeTask(TypeTask typeTask) {
-        this.typeTask = typeTask;
-    }
-
+    protected Integer id;
+    protected Status status;
     protected TypeTask typeTask;
     protected LocalDateTime startTime;
     protected Duration duration;
-
-
-
     public Task(String nameTask, String description) {
         this.nameTask = nameTask;
         this.description = description;
@@ -29,6 +21,8 @@ public class Task {
         id = null;
         this.typeTask = TypeTask.TASK;
     }
+
+
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
@@ -57,7 +51,7 @@ public class Task {
         this.duration = duration;
     }
 
-    protected Task(String nameTask, String description, TypeTask typeTask,  Duration duration) {
+    protected Task(String nameTask, String description, TypeTask typeTask, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
@@ -75,7 +69,7 @@ public class Task {
         this.typeTask = typeTask;
         this.duration = duration;
         this.startTime = localDateTime;
-      }
+    }
 
     protected Task(String nameTask, String description, int id, Duration duration) {
         this.nameTask = nameTask;
@@ -148,6 +142,9 @@ public class Task {
         return typeTask;
     }
 
+    public void setTypeTask(TypeTask typeTask) {
+        this.typeTask = typeTask;
+    }
 
     public String getNameTask() {
         return nameTask;

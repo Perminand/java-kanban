@@ -11,13 +11,14 @@ import java.time.LocalDateTime;
 
 public class Managers {
     public static TaskManager getDefault() {
-       return new FileBackedTasksManager(new File("./resources/Tasks.csv"));
+        return new FileBackedTasksManager(new File("./resources/Tasks.csv"));
     }
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
-    public static Gson getGson(){
+
+    public static Gson getGson() {
         GsonBuilder gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter());
         return gson.create();

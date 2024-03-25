@@ -23,8 +23,7 @@ public class DurationAdapter extends TypeAdapter<Duration> {
         JsonToken check = jsonReader.peek();
         if (check == JsonToken.NULL) {
             return null;
-        }
-        else
+        } else
             return Duration.ofMinutes(jsonReader.nextInt());
     }
 }

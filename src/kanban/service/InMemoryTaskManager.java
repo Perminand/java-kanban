@@ -22,18 +22,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int uin = 0;
 
-
-    public List<Task> getPrioritizedTasks() {
-        return new ArrayList<>(sortTaskTime);
-    }
-
-
     public static boolean isFreeTime(Task task, Set<Task> sortTaskTime) {
         for (Task taskSort : sortTaskTime) {
             if (task.getEndTime().isAfter(taskSort.getStartTime()) && task.getStartTime().isBefore(taskSort.getEndTime()) && !task.getUin().equals(taskSort.getUin()))
                 return false;
         }
         return true;
+    }
+
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(sortTaskTime);
     }
 
     @Override
@@ -49,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
             } else throw new IntersectionOfTime("Задача пересекается с существующей");
         }
         mapTask.put(key, task);
-            return key;
+        return key;
     }
 
     @Override
@@ -101,6 +99,7 @@ public class InMemoryTaskManager implements TaskManager {
         mapTask.put(task.getUin(), task);
 
     }
+
     @Override
     public void updateSubTask(SubTask subTask) {
         if (subTask == null) return;
@@ -132,22 +131,21 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTask(int id) {
-        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.TASK);
+        Optional<Task> optionalTask = getOptionalTasks(id, TypeTask.TASK);
         return optionalTask.orElse(null);
     }
 
     @Override
     public SubTask getSubTask(int id) {
-        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.SUBTASK);
+        Optional<Task> optionalTask = getOptionalTasks(id, TypeTask.SUBTASK);
         return (SubTask) optionalTask.orElse(null);
     }
 
     @Override
     public Epic getEpic(int id) {
-        Optional<Task> optionalTask = getOptionalTasks(id,TypeTask.EPIC);
+        Optional<Task> optionalTask = getOptionalTasks(id, TypeTask.EPIC);
         return (Epic) optionalTask.orElse(null);
     }
-
 
 
     @Override
@@ -311,9 +309,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
-    private Optional<Task> getOptionalTasks(int id, TypeTask typeTask){
+    private Optional<Task> getOptionalTasks(int id, TypeTask typeTask) {
         Optional<Task> optionalTask;
-        switch (typeTask){
+        switch (typeTask) {
             case TASK:
                 optionalTask = Optional.ofNullable(mapTask.get(id));
                 break;
