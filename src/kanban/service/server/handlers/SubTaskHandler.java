@@ -4,27 +4,29 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import kanban.exceptions.IntersectionOfTime;
+import kanban.exceptions.NoEpicExceptionForSubTask;
 import kanban.exceptions.NoTaskException;
+import kanban.model.SubTask;
 import kanban.model.Task;
 import kanban.service.Managers;
 import kanban.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
-public class TaskHandler implements HttpHandler {
+
+public class SubTaskHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
+    SendResponse sendResponse = new SendResponse();
 
-    public TaskHandler(TaskManager taskManager) {
+    public SubTaskHandler(TaskManager taskManager) {
         this.manager = taskManager;
         this.gson = Managers.getGson();
     }
 
-    SendResponse sendResponse = new SendResponse();
-
     @Override
     public void handle(HttpExchange exchange) throws IOException, NumberFormatException {
-        System.out.println("Пришел запрос "+exchange.getRequestMethod()+" на TASK");
+        System.out.println("Пришел запрос " + exchange.getRequestMethod() + " на SUBTASK");
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
         path = path.split("/api/v1")[1];
@@ -33,19 +35,18 @@ public class TaskHandler implements HttpHandler {
             case "GET":
                 switch (count) {
                     case 2:
-                        String s = gson.toJson(manager.getTasks());
+                        String s = gson.toJson(manager.getSubTasks());
                         sendResponse.send(exchange, 200, s);
                         break;
                     case 3:
                         int idTask = Integer.parseInt(path.split("/")[2]);
-                        Task task = manager.getTask(idTask);
-                        if (task == null) {
-                            sendResponse.send(exchange, 404, "Not Found");
-                        } else {
-                            sendResponse.send(exchange, 200, gson.toJson(
-                                    manager.getTask(idTask)));
+                        Task subtask = manager.getSubTask(idTask);
+                        if (subtask != null) {
+                            sendResponse.send(exchange, 200, gson.toJson(manager.getTask(idTask)));
                             break;
-
+                        } else {
+                            sendResponse.send(exchange, 404, "Not Found");
+                            break;
                         }
                     default:
                         break;
@@ -58,26 +59,26 @@ public class TaskHandler implements HttpHandler {
 
                 InputStream inputStream = exchange.getRequestBody();
                 String body = new String(inputStream.readAllBytes());
-                Task task = gson.fromJson(body, Task.class);
+                SubTask task = gson.fromJson(body, SubTask.class);
                 switch (count) {
                     case 2:
                         try {
-                            int id = manager.createTask(task);
-                            sendResponse.send(exchange, 201, gson.toJson("id:"+id));
-                        } catch (IntersectionOfTime | NullPointerException e) {
+                            int id = manager.createSubTask(task);
+                            sendResponse.send(exchange, 201, gson.toJson("id:" + id));
+
+                        } catch (IntersectionOfTime | NullPointerException | NoEpicExceptionForSubTask e) {
                             sendResponse.send(exchange, 406, e.getMessage());
                         }
                         break;
                     case 3:
                         try {
-                            manager.updateTask(task);
-                            sendResponse.send(exchange, 201, "Задача обновлена");
+                            manager.updateSubTask(task);
                         } catch (IntersectionOfTime e) {
                             sendResponse.send(exchange, 406, e.getMessage());
                         } catch (NullPointerException e) {
                             sendResponse.send(exchange, 406, "На это время есть задача в системе");
                         }
-
+                        sendResponse.send(exchange, 201, "Задача обновлена");
                         break;
                     default:
                         break;
@@ -86,7 +87,7 @@ public class TaskHandler implements HttpHandler {
             case "DELETE":
                 switch (count) {
                     case 2:
-                        manager.removeAllTask();
+                        manager.removeAllSubTask();
                         sendResponse.send(exchange, 200, "Все задачи удалены");
                         break;
                     case 3:
