@@ -7,16 +7,21 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Task {
-    protected Integer id;
     protected final String nameTask;
-    protected Status status;
     protected final String description;
-    protected final TypeTask typeTask;
-    protected LocalDateTime startTime = LocalDateTime.now();
+    protected Integer id;
+    protected Status status;
+    protected TypeTask typeTask;
+    protected LocalDateTime startTime;
     protected Duration duration;
-    protected LocalDateTime endTime;
 
-
+    public Task(String nameTask, String description) {
+        this.nameTask = nameTask;
+        this.description = description;
+        this.status = Status.NEW;
+        id = null;
+        this.typeTask = TypeTask.TASK;
+    }
 
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
@@ -25,7 +30,6 @@ public class Task {
         this.status = Status.NEW;
         id = null;
         this.typeTask = TypeTask.TASK;
-        this.endTime = initEndTime();
     }
 
     public Task(String nameTask, String description, TypeTask typeTask) {
@@ -45,8 +49,6 @@ public class Task {
         this.typeTask = TypeTask.TASK;
         this.startTime = localDateTime;
         this.duration = duration;
-        this.endTime = initEndTime();
-
     }
 
     protected Task(String nameTask, String description, TypeTask typeTask, Duration duration) {
@@ -56,13 +58,10 @@ public class Task {
         id = null;
         this.typeTask = typeTask;
         this.duration = duration;
-        this.endTime = initEndTime();
-
-
     }
 
-    protected Task(String nameTask, String description, TypeTask typeTask, LocalDateTime localDateTime,
-                   Duration duration) {
+    protected Task(String nameTask, String description, TypeTask typeTask, Duration duration,
+                   LocalDateTime localDateTime) {
         this.nameTask = nameTask;
         this.description = description;
         this.status = Status.NEW;
@@ -70,9 +69,6 @@ public class Task {
         this.typeTask = typeTask;
         this.duration = duration;
         this.startTime = localDateTime;
-        this.endTime = initEndTime();
-
-
     }
 
     protected Task(String nameTask, String description, int id, Duration duration) {
@@ -81,9 +77,8 @@ public class Task {
         this.id = id;
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
-        this.endTime = initEndTime();
-
     }
+
 
     public Task(int id, String nameTask, String description, Status status, TypeTask typeTask,
                 LocalDateTime startTime, Duration duration) {
@@ -93,10 +88,7 @@ public class Task {
         this.status = status;
         this.typeTask = typeTask;
         this.startTime = startTime;
-        this.endTime = initEndTime();
         this.duration = duration;
-
-
     }
 
     public Task(int id, String newName, String newDescription, Status status, LocalDateTime localDateTime,
@@ -108,9 +100,6 @@ public class Task {
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
         this.startTime = localDateTime;
-        this.endTime = initEndTime();
-
-
     }
 
     public Task(int id, String newName, String newDescription, Status status, Duration duration) {
@@ -120,9 +109,6 @@ public class Task {
         this.status = status;
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
-        this.endTime = initEndTime();
-
-
     }
 
     public LocalDateTime getStartTime() {
@@ -157,6 +143,10 @@ public class Task {
         return typeTask;
     }
 
+    public void setTypeTask(TypeTask typeTask) {
+        this.typeTask = typeTask;
+    }
+
     public String getNameTask() {
         return nameTask;
     }
@@ -165,18 +155,11 @@ public class Task {
         return description;
     }
 
-    public LocalDateTime initEndTime() {
+    public LocalDateTime getEndTime() {
         if (startTime == null || duration == null) return null;
         return startTime.plus(duration);
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
 
     @Override
     public String toString() {
@@ -186,7 +169,6 @@ public class Task {
                 ", typeTask=" + typeTask +
                 ", startTime=" + startTime +
                 ", duration=" + duration +
-                ", endTime=" + endTime +
                 ", id=" + id +
                 ", status=" + status +
                 '}';

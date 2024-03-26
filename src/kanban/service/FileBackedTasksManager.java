@@ -30,7 +30,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     i++;
                     continue;
                 }
-                if (line.isEmpty()) {//Поменял Equals("")
+                if (line.isEmpty()) {
                     isHistory = true;
                     i++;
                     continue;
@@ -121,6 +121,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
+    public void deleteById(int id) {
+        super.deleteById(id);
+        save();
+    }
+
+    @Override
     public void removeAllTask() {
         super.removeAllTask();
         save();
@@ -144,6 +150,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
         return listSubTask;
     }
+
     protected void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
             fileWriter.write("id,type,name,status,description,epic,startDate,duration");
