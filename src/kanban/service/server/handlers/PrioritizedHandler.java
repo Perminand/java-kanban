@@ -11,7 +11,7 @@ import java.io.IOException;
 public class PrioritizedHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
-    SendResponse sendResponse = new SendResponse();
+    private final SendResponse sendResponse = new SendResponse();
 
     public PrioritizedHandler(TaskManager taskManager) {
         this.manager = taskManager;
