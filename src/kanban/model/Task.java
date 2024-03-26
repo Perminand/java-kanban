@@ -108,6 +108,8 @@ public class Task {
         this.duration = duration;
         this.startTime = localDateTime;
     }
+
+
     public Task(int id, String newName, String newDescription, Status status, Duration duration) {
         this.id = id;
         this.nameTask = newName;
