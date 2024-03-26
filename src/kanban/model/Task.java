@@ -14,6 +14,9 @@ public class Task {
     protected TypeTask typeTask;
     protected LocalDateTime startTime;
     protected Duration duration;
+
+    // Конструкторы класса Task
+
     public Task(String nameTask, String description) {
         this.nameTask = nameTask;
         this.description = description;
