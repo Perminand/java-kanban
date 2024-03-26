@@ -23,7 +23,7 @@ class EpicHandlerTest {
     private static final int PORT = 8080;
     TaskManager manager = new InMemoryTaskManager();
     HttpTaskServer server = new HttpTaskServer(manager);
-    Gson gson = Managers.getGson();
+    private final Gson gson = Managers.getGson();
 
     EpicHandlerTest() throws IOException {
     }
@@ -114,6 +114,6 @@ class EpicHandlerTest {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         Assertions.assertEquals(200,response.statusCode(),"Неверный код ответа");
         Assertions.assertEquals(1,manager.getSubTaskByIdEpic(manager.getEpic(idEpic)).size(),
-                "Не верное количестов задач");
+                "Не верное количество задач");
     }
 }
