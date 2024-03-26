@@ -11,7 +11,7 @@ import java.io.IOException;
 public class HistoryHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
-    SendResponse sendResponse = new SendResponse();
+    private final SendResponse sendResponse = new SendResponse();
 
     public HistoryHandler(TaskManager taskManager) {
         this.manager = taskManager;
