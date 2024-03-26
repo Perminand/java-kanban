@@ -21,8 +21,6 @@ public class Task {
         id = null;
         this.typeTask = TypeTask.TASK;
     }
-
-
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
