@@ -38,7 +38,6 @@ public class Task {
         startTime = null;
         this.typeTask = typeTask;
     }
-
     public Task(String nameTask, String description, Status status, LocalDateTime localDateTime, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
