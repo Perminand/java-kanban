@@ -24,6 +24,7 @@ public class Task {
         this.typeTask = TypeTask.TASK;
     }
 
+
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
