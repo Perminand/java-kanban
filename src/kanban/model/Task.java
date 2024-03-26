@@ -23,7 +23,6 @@ public class Task {
         id = null;
         this.typeTask = TypeTask.TASK;
     }
-
     public Task(String nameTask, String description, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
@@ -32,7 +31,6 @@ public class Task {
         id = null;
         this.typeTask = TypeTask.TASK;
     }
-
     public Task(String nameTask, String description, TypeTask typeTask) {
         this.nameTask = nameTask;
         this.description = description;
@@ -41,7 +39,6 @@ public class Task {
         startTime = null;
         this.typeTask = typeTask;
     }
-
     public Task(String nameTask, String description, Status status, LocalDateTime localDateTime, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
@@ -51,7 +48,6 @@ public class Task {
         this.startTime = localDateTime;
         this.duration = duration;
     }
-
     protected Task(String nameTask, String description, TypeTask typeTask, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
@@ -60,7 +56,6 @@ public class Task {
         this.typeTask = typeTask;
         this.duration = duration;
     }
-
     protected Task(String nameTask, String description, TypeTask typeTask, Duration duration,
                    LocalDateTime localDateTime) {
         this.nameTask = nameTask;
@@ -71,7 +66,6 @@ public class Task {
         this.duration = duration;
         this.startTime = localDateTime;
     }
-
     protected Task(String nameTask, String description, int id, Duration duration) {
         this.nameTask = nameTask;
         this.description = description;
@@ -79,7 +73,6 @@ public class Task {
         this.typeTask = TypeTask.TASK;
         this.duration = duration;
     }
-
     public Task(int id, String nameTask, String description, Status status, TypeTask typeTask,
                 LocalDateTime startTime, Duration duration) {
         this.nameTask = nameTask;
@@ -90,7 +83,6 @@ public class Task {
         this.startTime = startTime;
         this.duration = duration;
     }
-
     public Task(int id, String newName, String newDescription, Status status, LocalDateTime localDateTime,
                 Duration duration) {
         this.id = id;
@@ -101,7 +93,6 @@ public class Task {
         this.duration = duration;
         this.startTime = localDateTime;
     }
-
     public Task(int id, String newName, String newDescription, Status status, Duration duration) {
         this.id = id;
         this.nameTask = newName;
